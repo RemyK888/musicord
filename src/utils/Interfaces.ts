@@ -1,4 +1,4 @@
-import { Channel } from "discord.js";
+import { Channel } from 'discord.js';
 
 export interface MusicordOptions {
   ytApiKey: string;
@@ -34,10 +34,22 @@ export interface DJSApplicationCommandSchema {
 }
 
 export interface InitQueueOptions {
-  channel: Channel,
+  channel: Channel;
   advancedOptions: any;
 }
 
+type Ran<T extends number> = number extends T ? number : Range<T, []>;
+type Range<T extends number, R extends unknown[]> = R['length'] extends T ? R[number] : Range<T, [R['length'], ...R]>;
+
 export interface FFmpegCustomEqualizerOptions {
-  bands: number
+  band1?: Ran<101>;
+  band2?: Ran<101>;
+  band3?: Ran<101>;
+  band4?: Ran<101>;
+  band5?: Ran<101>;
+  band6?: Ran<101>;
+  band7?: Ran<101>;
+  band8?: Ran<101>;
+  band9?: Ran<101>;
+  band10?: Ran<101>;
 }

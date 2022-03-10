@@ -36,7 +36,7 @@ const rest = new REST({ version: '10' }).setToken('NzU3MTQzOTIzODM4OTQzMzE0.X2cH
 
 import { Client } from 'discord.js';
 
-import { Musicord } from '../src/index';
+import { Musicord, AudioFilters } from '../src/index';
 
 const client = new Client({
   intents: 32767
@@ -48,11 +48,26 @@ const musicordPlayer = new Musicord(client, {
 
 //import AudioFilters from '../src/FFmpegAudioFilters';
 
+console.log(AudioFilters.customEqualizer({
+  band1: 99,
+  band2: 45,
+  band3: 54,
+  band4: 53,
+  band5: 52,
+  band6: 51,
+  band7: 50,
+  band8: 49,
+  band9: 48,
+  band10: 47,
+}))
+
 client.on('messageCreate', (message) => {
   if(message.content === '!play') {
     musicordPlayer.play('sdfsdf', message.member?.voice.channel);
   }
 })
+
+
 
 
 

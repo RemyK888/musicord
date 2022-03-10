@@ -1,6 +1,6 @@
-import { FFmpegAudioFilters } from './FFmpegAudioFilters';
+import { FFmpegAudioFilters } from './structures/FFmpegAudioFilters';
 
 export { version } from '../package.json';
 
-export * from './Musicord';
+export * from './structures/Musicord';
 export const AudioFilters = new FFmpegAudioFilters();
