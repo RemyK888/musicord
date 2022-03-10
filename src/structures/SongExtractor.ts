@@ -1,3 +1,4 @@
+
 const youtubeTester = new RegExp(/http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\\_]*)(&(amp;)?‌​[\w\\?‌​=]*)?/g);
 
 export class SongExtractor {
@@ -8,17 +9,17 @@ export class SongExtractor {
     /**
      * getMp3Url
      */
-    public async getMp3URL(link: string): Promise<string> {
+    public getMp3URL(link: string): string {
         if(!link || youtubeTester.test(link) == false) throw new Error('Pas valide !!!')
 
         
-        return 'xcv'
+        return ''
     }
     
 
 
 }
 
-const extractor = new SongExtractor
+const extractor = new SongExtractor()
 
-console.log(extractor.getMp3URL('https://youtu.be/O4v1Mwyg-GM'))
+console.log( extractor.getMp3URL('https://youtu.be/O4v1Mwyg-GM'))

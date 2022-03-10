@@ -2,7 +2,7 @@ import ytdl from 'ytdl-core';
 import prism from 'prism-media';
 import { pipeline } from 'stream';
 import { EventEmitter } from 'events';
-import { VoiceChannel, StageChannel, Guild, GuildResolvable, Client } from 'discord.js';
+import { VoiceChannel, StageChannel, Guild, Client } from 'discord.js';
 import {
   joinVoiceChannel,
   createAudioPlayer,
@@ -11,7 +11,8 @@ import {
   AudioResource,
 } from '@discordjs/voice';
 
-import { InitQueueOptions, MusicordOptions } from '../utils/Interfaces';
+import { InitQueueOptions, MusicordOptions, QueueOptions } from '../utils/Interfaces';
+import { Player } from './Player';
 
 async function createWritableStream(url: string): Promise<NodeJS.WritableStream> {
   const songInfo = await ytdl.getInfo(url);
@@ -52,7 +53,7 @@ async function createWritableStream(url: string): Promise<NodeJS.WritableStream>
 export class Musicord extends EventEmitter {
   public readonly client: Client;
   public readonly options: MusicordOptions | {} = {};
-  public readonly queue: Map<string, object> = new Map();
+  public readonly queue: Map<string, QueueOptions> = new Map();
 
   /**
    * Create a new Musicord
@@ -68,20 +69,23 @@ export class Musicord extends EventEmitter {
     console.log(this.options);
   }
 
-  public getQueue(guild: Guild | GuildResolvable, options: InitQueueOptions) {
-    if(!guild || guild instanceof Guild == false) throw new TypeError('');
-    if(!options || typeof options !== 'object') throw new TypeError('');
-    let guildQueueArgs = {
-      guild: guild,
-      textChannel: options.textChannel,
-      voiceChannel: options.voiceChannel,
-      connection: null,
-      songs: [],
-      volume: 0.5,
-      playing: false
+  public initQueue(guild: Guild, options: InitQueueOptions): Player {
+    if (!guild || guild instanceof Guild == false) throw new TypeError('');
+    if (!options || typeof options !== 'object') throw new TypeError('');
+    if (!this.queue.get(guild.id)) this.queue.set(guild.id, { guild: guild, textChannel: options.textChannel, voiceChannel: options.voiceChannel, connection: null, songs: [], volume: options.advancedOptions?.volume ?? 0.5, playing: false });
+    else {
+      const currentQueue = this.queue.get(guild.id);
+      for(const e in options) {
+        
+      }
     }
-
+    return new Player(this.queue.get(guild.id) as QueueOptions);
   }
+
+  public getQueueInfo(guild: Guild): QueueOptions | undefined {
+    if (!guild || guild instanceof Guild == false) throw new TypeError('');
+    return this.queue.get(guild.id);
+  };
 
   public async play(song: string, channel: VoiceChannel | StageChannel | any) {
     const voiceConnection = joinVoiceChannel({
