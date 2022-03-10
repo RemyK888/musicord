@@ -1,4 +1,5 @@
-import { Channel } from 'discord.js';
+import { AudioPlayer } from '@discordjs/voice';
+import { Channel, VoiceChannel, ThreadChannel, AnyChannel, Guild, GuildResolvable } from 'discord.js';
 
 export interface MusicordOptions {
   ytApiKey: string;
@@ -34,22 +35,37 @@ export interface DJSApplicationCommandSchema {
 }
 
 export interface InitQueueOptions {
-  channel: Channel;
-  advancedOptions: any;
+  textChannel: Channel | ThreadChannel | AnyChannel;
+  voiceChannel: VoiceChannel;
+  advancedOptions?: any;
 }
 
-type Ran<T extends number> = number extends T ? number : Range<T, []>;
-type Range<T extends number, R extends unknown[]> = R['length'] extends T ? R[number] : Range<T, [R['length'], ...R]>;
+type Enumerate<N extends number, Acc extends number[] = []> = Acc['length'] extends N
+  ? Acc[number]
+  : Enumerate<N, [...Acc, Acc['length']]>;
+export type Range<F extends number, T extends number> = Exclude<Enumerate<T>, Enumerate<F>>;
 
 export interface FFmpegCustomEqualizerOptions {
-  band1?: Ran<101>;
-  band2?: Ran<101>;
-  band3?: Ran<101>;
-  band4?: Ran<101>;
-  band5?: Ran<101>;
-  band6?: Ran<101>;
-  band7?: Ran<101>;
-  band8?: Ran<101>;
-  band9?: Ran<101>;
-  band10?: Ran<101>;
+  band1?: Range<0, 101>;
+  band2?: Range<0, 101>;
+  band3?: Range<0, 101>;
+  band4?: Range<0, 101>;
+  band5?: Range<0, 101>;
+  band6?: Range<0, 101>;
+  band7?: Range<0, 101>;
+  band8?: Range<0, 101>;
+  band9?: Range<0, 101>;
+  band10?: Range<0, 101>;
+}
+
+interface Song {}
+
+export interface QueueOptions {
+  guild: Guild | GuildResolvable;
+  textChannel: AnyChannel;
+  voiceChannel: VoiceChannel;
+  connection: AudioPlayer | null;
+  songs: Song[];
+  volume: number;
+  playing: boolean;
 }

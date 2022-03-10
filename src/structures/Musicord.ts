@@ -45,13 +45,20 @@ async function createWritableStream(url: string): Promise<NodeJS.WritableStream>
       }),
       opus,
     ],
-    () => {},
+    () => { },
   );
 }
 
 export class Musicord extends EventEmitter {
-  public client: Client;
+  public readonly client: Client;
   public readonly options: MusicordOptions | {} = {};
+  public readonly queue: Map<string, object> = new Map();
+
+  /**
+   * Create a new Musicord
+   * @param {Client} client [Discord.Js client ](https://discord.js.org/#/docs/discord.js/stable/class/Client)
+   * @param {MusicordOptions} options Musicord options
+   */
   constructor(client: Client, options?: MusicordOptions) {
     super();
     if (!client || client instanceof Client == false) throw new TypeError('');
@@ -61,7 +68,20 @@ export class Musicord extends EventEmitter {
     console.log(this.options);
   }
 
-  public getQueue(guild: Guild | GuildResolvable, options: InitQueueOptions) {}
+  public getQueue(guild: Guild | GuildResolvable, options: InitQueueOptions) {
+    if(!guild || guild instanceof Guild == false) throw new TypeError('');
+    if(!options || typeof options !== 'object') throw new TypeError('');
+    let guildQueueArgs = {
+      guild: guild,
+      textChannel: options.textChannel,
+      voiceChannel: options.voiceChannel,
+      connection: null,
+      songs: [],
+      volume: 0.5,
+      playing: false
+    }
+
+  }
 
   public async play(song: string, channel: VoiceChannel | StageChannel | any) {
     const voiceConnection = joinVoiceChannel({

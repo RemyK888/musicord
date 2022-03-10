@@ -68,8 +68,5 @@ client.on('messageCreate', (message) => {
 })
 
 
-
-
-
 client.login('NzI2NTEwNjE3MDQ5MTcwMDAx.XveVvQ.02Tiq0jHIoh1YOz2a500CJO2dBQ')
 
