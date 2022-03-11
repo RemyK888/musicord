@@ -46,7 +46,7 @@ async function createWritableStream(url: string): Promise<NodeJS.WritableStream>
       }),
       opus,
     ],
-    () => { },
+    () => {},
   );
 }
 
@@ -72,22 +72,39 @@ export class Musicord extends EventEmitter {
   public initQueue(guild: Guild, options: InitQueueOptions): Player {
     if (!guild || guild instanceof Guild == false) throw new TypeError('');
     if (!options || typeof options !== 'object') throw new TypeError('');
-    if (!this.queue.get(guild.id)) this.queue.set(guild.id, { guild: guild, textChannel: options.textChannel, voiceChannel: options.voiceChannel, connection: null, songs: [], volume: options.advancedOptions?.volume ?? 0.5, playing: false });
+    if (!this.queue.get(guild.id))
+      this.queue.set(guild.id, {
+        guild: guild,
+        textChannel: options.textChannel,
+        voiceChannel: options.voiceChannel,
+        connection: null,
+        songs: [],
+        volume: options.advancedOptions?.volume ?? 0.5,
+        playing: false,
+      });
     else {
       const currentQueue = this.queue.get(guild.id);
-      for(const e in options) {
-        
-      }
+      if (options.textChannel !== currentQueue?.textChannel || options.voiceChannel !== currentQueue.voiceChannel)
+        this.queue.set(guild.id, {
+          guild: guild,
+          textChannel: options.textChannel,
+          voiceChannel: options.voiceChannel,
+          connection: null,
+          songs: [],
+          volume:
+            typeof currentQueue?.volume !== 'undefined' ? currentQueue.volume : options.advancedOptions?.volume ?? 0.5,
+          playing: false,
+        });
     }
-    return new Player(this.queue.get(guild.id) as QueueOptions);
+    return new Player(this.queue.get(guild.id) as unknown as Map<string, QueueOptions>, guild);
   }
 
   public getQueueInfo(guild: Guild): QueueOptions | undefined {
     if (!guild || guild instanceof Guild == false) throw new TypeError('');
     return this.queue.get(guild.id);
-  };
+  }
 
-  public async play(song: string, channel: VoiceChannel | StageChannel | any) {
+  public async play(song: string, channel: VoiceChannel | StageChannel) {
     const voiceConnection = joinVoiceChannel({
       channelId: channel.id,
       guildId: channel.guildId,

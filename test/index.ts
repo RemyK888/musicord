@@ -63,7 +63,21 @@ console.log(AudioFilters.customEqualizer({
 
 client.on('messageCreate', (message) => {
   if(message.content === '!play') {
-    musicordPlayer.play('sdfsdf', message.member?.voice.channel);
+    //musicordPlayer.play('sdfsdf', message.member?.voice.channel);
+    if(message.guild && message.member && message.member.voice.channel) {
+      musicordPlayer.initQueue(message.guild, {
+        textChannel: message.channel,
+        voiceChannel: message.member.voice.channel
+      })
+    }
+  }
+  if(message.content === '!coucou') {
+    if(message.guild && message.member && message.member.voice.channel) {
+      const queue = musicordPlayer.initQueue(message.guild, {
+        textChannel: message.channel, 
+        voiceChannel: message.member.voice.channel
+      })
+    }
   }
 })
 

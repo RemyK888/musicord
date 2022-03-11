@@ -1,5 +1,5 @@
-import { AudioPlayer } from '@discordjs/voice';
-import { Channel, VoiceChannel, ThreadChannel, AnyChannel, Guild } from 'discord.js';
+import { VoiceConnection } from '@discordjs/voice';
+import { Channel, VoiceChannel, ThreadChannel, AnyChannel, Guild, VoiceBasedChannel, StageChannel } from 'discord.js';
 
 export interface MusicordOptions {
   ytApiKey: string;
@@ -41,10 +41,10 @@ export type Range<F extends number, T extends number> = Exclude<Enumerate<T>, En
 
 export interface InitQueueOptions {
   textChannel: Channel | ThreadChannel | AnyChannel;
-  voiceChannel: VoiceChannel;
+  voiceChannel: VoiceBasedChannel | VoiceChannel | StageChannel;
   advancedOptions?: {
-    volume?: Range<0, 100>
-  }
+    volume?: Range<0, 101>;
+  };
 }
 
 export interface FFmpegCustomEqualizerOptions {
@@ -63,11 +63,11 @@ export interface FFmpegCustomEqualizerOptions {
 interface Song {}
 
 export interface QueueOptions {
-  guild: Guild;
-  textChannel: Channel | ThreadChannel | AnyChannel;
-  voiceChannel: VoiceChannel;
-  connection: AudioPlayer | null;
-  songs: Song[];
-  volume: number;
-  playing: boolean;
+  guild?: Guild;
+  textChannel?: Channel | ThreadChannel | AnyChannel;
+  voiceChannel?: VoiceBasedChannel | VoiceChannel | StageChannel;
+  connection?: VoiceConnection | null;
+  songs?: Song[];
+  volume?: number;
+  playing?: boolean;
 }
