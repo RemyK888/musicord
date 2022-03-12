@@ -5,7 +5,5 @@ export class SongSearcher {
 }
 
 class SongExtractor {
-  constructor() {
-    
-  }
+  constructor() {}
 }

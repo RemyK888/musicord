@@ -1,4 +1,3 @@
-
 import { EventEmitter } from 'events';
 import { Guild, Client } from 'discord.js';
 

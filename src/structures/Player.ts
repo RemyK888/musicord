@@ -1,5 +1,11 @@
 import { Guild, StageChannel, VoiceChannel } from 'discord.js';
-import { VoiceConnection, joinVoiceChannel, NoSubscriberBehavior, createAudioPlayer, createAudioResource } from '@discordjs/voice';
+import {
+  VoiceConnection,
+  joinVoiceChannel,
+  NoSubscriberBehavior,
+  createAudioPlayer,
+  createAudioResource,
+} from '@discordjs/voice';
 import ytdl from 'ytdl-core';
 import prism from 'prism-media';
 import { pipeline } from 'stream';
@@ -20,7 +26,7 @@ export class Player {
   public assignVoiceConnection(connection: VoiceConnection): void {
     if (!connection || connection instanceof VoiceConnection == false) throw new TypeError('');
     this.queue.set(this.guild.id, {
-      connection: connection
+      connection: connection,
     });
   }
 
@@ -36,12 +42,14 @@ export class Player {
       adapterCreator: this.guild.voiceAdapterCreator,
     });
     this.queue.set(this.guild.id, {
-      connection: voiceConnection
+      connection: voiceConnection,
     });
-  } 
+  }
 
-  public setFilter(filter: string | string[]) { 
-    if(!filter) throw new TypeError('');
+  public setFilter(filter: string | string[]): void {
+    if (!filter || (typeof filter !== 'string' && filter instanceof Array === false)) throw new TypeError('');
+    if (Array.isArray(filter)) this.filters.push(...filter);
+    else this.filters.push(filter);
   }
 
   public async play(song: string, channel: VoiceChannel | StageChannel) {

@@ -65,16 +65,12 @@ client.on('messageCreate', (message) => {
   if(message.content === '!play') {
     //musicordPlayer.play('sdfsdf', message.member?.voice.channel);
     if(message.guild && message.member && message.member.voice.channel) {
-      musicordPlayer.initQueue(message.guild, {
+      const queue = musicordPlayer.initQueue(message.guild, {
         textChannel: message.channel,
         voiceChannel: message.member.voice.channel
-      }).setFilter([ AudioFilters.extraStereo ])
-      
-    }
-  }
-  if(message.content === '!coucou') {
-    if(message.guild) {
-      console.log(musicordPlayer.getQueue(message.guild))
+      })
+      queue.setFilter([ AudioFilters.extraStereo, AudioFilters.mono ])
+      console.log(queue.filters);
     }
   }
 })
