@@ -41,7 +41,7 @@ export type Range<F extends number, T extends number> = Exclude<Enumerate<T>, En
 
 export interface InitQueueOptions {
   textChannel: Channel | ThreadChannel | AnyChannel;
-  voiceChannel: VoiceBasedChannel | VoiceChannel | StageChannel;
+  voiceChannel?: VoiceBasedChannel | VoiceChannel | StageChannel;
   advancedOptions?: {
     volume?: Range<0, 101>;
   };
