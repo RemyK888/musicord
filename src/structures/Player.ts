@@ -5,43 +5,45 @@ import {
   NoSubscriberBehavior,
   createAudioPlayer,
   createAudioResource,
+  StreamType,
 } from '@discordjs/voice';
 import ytdl from 'ytdl-core';
 import prism from 'prism-media';
 import { pipeline } from 'stream';
 
-import { QueueOptions } from '../utils/Interfaces';
+import { QueueOptions, Song } from '../utils/Interfaces';
+import { youTubePattern } from '../utils/Constants';
 
 export class Player {
   public guild: Guild;
   public filters: string[] = [];
-  private queue: Map<string, QueueOptions>;
+  private _queue: Map<string, QueueOptions>;
   constructor(queue: Map<string, QueueOptions>, guild: Guild) {
     if (!queue || queue.constructor !== Map) throw new Error('');
     if (!guild || guild instanceof Guild == false) throw new Error('');
-    this.queue = queue;
+    this._queue = queue;
     this.guild = guild;
   }
 
   public assignVoiceConnection(connection: VoiceConnection): void {
     if (!connection || connection instanceof VoiceConnection == false) throw new TypeError('');
-    this.queue.set(this.guild.id, {
+    this._queue.set(this.guild.id, {
       connection: connection,
     });
   }
 
-  public addSong(song: string) {
-    this.queue.get(this.guild.id)?.songs?.push(song);
+  public addSong(song: Song) {
+    this._queue.get(this.guild.id)?.songs?.push(song);
   }
 
   public createVoiceConnection(): void {
-    const serverQueue = this.queue.get(this.guild.id);
+    const serverQueue = this._queue.get(this.guild.id);
     const voiceConnection = joinVoiceChannel({
       channelId: serverQueue?.voiceChannel?.id as string,
       guildId: this.guild.id,
       adapterCreator: this.guild.voiceAdapterCreator,
     });
-    this.queue.set(this.guild.id, {
+    this._queue.set(this.guild.id, {
       connection: voiceConnection,
     });
   }
@@ -52,7 +54,10 @@ export class Player {
     else this.filters.push(filter);
   }
 
-  public async play(song: string, channel: VoiceChannel | StageChannel) {
+  public async play(song: string | Song, channel: VoiceChannel | StageChannel) {
+    if (!song) throw new TypeError('');
+    if (typeof song === 'string' && youTubePattern.test(song)) {
+    }
     const voiceConnection = joinVoiceChannel({
       channelId: channel.id,
       guildId: channel.guildId,
@@ -63,14 +68,14 @@ export class Player {
         noSubscriber: ('pause' || 'play') as NoSubscriberBehavior,
       },
     });
-    const resource = createAudioResource((await this.createWritableStream('https://youtu.be/O4v1Mwyg-GM')) as any);
-    player.play(resource);
-
+    const resource = createAudioResource((await this._createWritableStream('https://youtu.be/O4v1Mwyg-GM')) as any, {
+      inputType: 'opus' as StreamType,
+    });
     voiceConnection.subscribe(player);
+    player.play(resource);
   }
 
-  private async createWritableStream(url: string): Promise<NodeJS.WritableStream> {
-    const songInfo = await ytdl.getInfo(url);
+  private async _createWritableStream(url: string): Promise<NodeJS.WritableStream> {
     const opus = new prism.opus.Encoder({ rate: 48000, channels: 2, frameSize: 960 });
     return pipeline(
       [
@@ -83,7 +88,7 @@ export class Player {
             '-reconnect_delay_max',
             '5',
             '-i',
-            songInfo.formats[0].url,
+            url,
             '-analyzeduration',
             '0',
             '-loglevel',

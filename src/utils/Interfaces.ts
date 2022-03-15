@@ -60,7 +60,48 @@ export interface FFmpegCustomEqualizerOptions {
   band10?: Range<0, 101>;
 }
 
-interface Song {}
+export interface Song {
+  id: string;
+  url: string;
+  title: string;
+  msDuration: number;
+  duration: string;
+  description: string;
+  thumbnails: ThumbnailsOptions[];
+  channel: {
+    id: string;
+    title: string;
+    url: string;
+  };
+  streamURL: string;
+}
+
+interface ThumbnailsOptions {
+  url: string;
+  width: number;
+  height: number;
+}
+
+export interface SearchedSong {
+  type: 'video' | 'playlist';
+  id: string;
+  url: string;
+  title: string;
+  thumbnails: ThumbnailsOptions[];
+  description: string;
+  duration: string;
+  msDuration: number;
+  channel: {
+    id: string;
+    url: string;
+    title: string;
+    thumbnails: ThumbnailsOptions[];
+  };
+}
+
+export interface SearchOptions {
+  maxResults?: Range<0, 101>;
+}
 
 export interface QueueOptions {
   guild?: Guild;
