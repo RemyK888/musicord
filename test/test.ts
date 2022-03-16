@@ -29,7 +29,7 @@ interface IterateNum {
       const video = (await getVideoInfo(result[0].url)).normalFormats.slice(-1)[0].url
     console.log(video)
   })();
-  */
+  
 
 //import fetch from 'node-fetch';
 
@@ -42,7 +42,7 @@ const body = {
             userAgent: "gzip(gfe)", 
             clientName: "WEB_EMBEDDED_PLAYER", 
             clientVersion: "20201212" 
-        },*/
+        },
         client: {
             hl: 'en',
             gl: 'US',
@@ -59,7 +59,7 @@ const body = {
 
 import { request } from 'undici';
 
-/*
+
 (async () => {
     const { body } = await request('https://www.youtube.com/youtubei/v1/player?key=AIzaSyCjc_pVEDi4qsv5MtC2dMXzpIaDoRFLsxw', {
         method: 'POST',
@@ -75,8 +75,10 @@ import { request } from 'undici';
 
     console.log(jsonData);
 })();
-*/
+
 
 import { audioPattern } from '../src/utils/Constants';
 
 console.log(audioPattern.test('http://ccmixter.org/content/Lav/Lav_-_dark_quiet_night_(war_in_europe_2022_edition).mp3'))
+
+*/

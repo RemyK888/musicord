@@ -108,8 +108,12 @@ export interface QueueOptions {
   textChannel?: Channel | ThreadChannel | AnyChannel;
   voiceChannel?: VoiceBasedChannel | VoiceChannel | StageChannel;
   connection?: VoiceConnection | null;
-  songs?: Song[];
+  songs: Song[];
   volume?: number;
   playing?: boolean;
-  filters?: string[];
+  filters: string[];
+}
+
+export interface PlayerEventsList {
+  trackStart: string
 }

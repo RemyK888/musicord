@@ -15,6 +15,8 @@ import { SongSearcher } from './SongSearcher';
 import { QueueOptions, Song } from '../utils/Interfaces';
 import { youTubePattern, audioPattern, DefaultFFmpegArgs } from '../utils/Constants';
 
+const dwayneTheBlock = () => { };
+
 export class Player extends EventEmitter {
   public guild: Guild;
   private _queue: Map<string, QueueOptions>;
@@ -27,6 +29,9 @@ export class Player extends EventEmitter {
     this.guild = guild;
   }
 
+  /**
+   * @param {VoiceConnection} connection
+   */
   public assignVoiceConnection(connection: VoiceConnection): void {
     if (!connection || connection instanceof VoiceConnection === false) throw new TypeError('');
     const currentQueue = this._queue.get(this.guild.id);
@@ -34,7 +39,9 @@ export class Player extends EventEmitter {
   }
 
   public addSong(song: Song) {
-    this._queue.get(this.guild.id)?.songs?.push(song);
+    if (!song || !('url' in song)) throw new TypeError('');
+    const currentQueue = this._queue.get(this.guild.id);
+    if (currentQueue && currentQueue.songs) currentQueue.songs.push(song);
   }
 
   public createVoiceConnection(): void {
@@ -51,47 +58,57 @@ export class Player extends EventEmitter {
   public setFilter(filter: string | string[]): void {
     if (!filter || (typeof filter !== 'string' && filter instanceof Array === false)) throw new TypeError('');
     const currentQueue = this._queue.get(this.guild.id);
-    if (currentQueue && currentQueue.filters && typeof filter === 'string') {
-      if (Array.isArray(filter)) currentQueue.filters?.push(...filter);
+    if (currentQueue) {
+      if (!currentQueue.filters) this.resetFilters();
+      if (Array.isArray(filter)) currentQueue.filters.push(...filter);
       else currentQueue.filters.push(filter);
-    } else if (currentQueue) {
-      currentQueue.filters = [];
-      return this.setFilter(filter);
     }
   }
 
-  public async play(song: Song | string, channel?: VoiceChannel | StageChannel) {
+  public resetFilters() {
+    const currentQueue = this._queue.get(this.guild.id)
+    if (currentQueue) {
+      currentQueue.filters = [];
+    } else return;
+  }
+
+  public async play(song: Song | string, channel?: VoiceChannel | StageChannel): Promise<void> {
     if (!song) throw new TypeError('');
     const currentQueue = this._queue.get(this.guild.id);
-    if (currentQueue?.connection === (null || undefined) && !channel && !currentQueue?.voiceChannel) return;
-    if (currentQueue && !currentQueue.connection)
-      currentQueue.connection = joinVoiceChannel({
-        channelId: currentQueue.voiceChannel?.id as string,
-        guildId: this.guild.id,
-        adapterCreator: this.guild.voiceAdapterCreator,
+    if (currentQueue) {
+      if (currentQueue.connection === (null || undefined) && !channel && !currentQueue.voiceChannel) return;
+      if (currentQueue && !currentQueue.connection) {
+        currentQueue.connection = joinVoiceChannel({
+          channelId: (currentQueue.voiceChannel?.id ?? channel) as string,
+          guildId: this.guild.id,
+          adapterCreator: this.guild.voiceAdapterCreator,
+        });
+      }
+      let extractedSongStreamURL: string = '';
+      if (typeof song === 'string' && youTubePattern.test(song)) {
+        const extractedVideo = await this._songSearcher.extractVideoInfo(song);
+        extractedSongStreamURL = extractedVideo.streamURL;
+        currentQueue.songs.push(extractedVideo);
+      } else if (typeof song === 'string' && audioPattern.test(song)) {
+        extractedSongStreamURL = song;
+        currentQueue.songs.push({
+          url: extractedSongStreamURL,
+        } as Song);
+      } else return;
+      const voiceConnection = this._queue.get(this.guild.id)?.connection;
+      const player = createAudioPlayer({
+        behaviors: {
+          noSubscriber: ('pause' || 'play') as NoSubscriberBehavior,
+        },
       });
-    let extractedSongStreamURL: string = '';
-    if (typeof song === 'string' && youTubePattern.test(song)) {
-      const extractedVideo = await this._songSearcher.extractVideoInfo(song);
-      extractedSongStreamURL = extractedVideo.streamURL;
-      currentQueue?.songs?.push(extractedVideo);
-    } else if (typeof song === 'string' && audioPattern.test(song)) {
-      extractedSongStreamURL = song;
-      currentQueue?.songs?.push({
-        url: extractedSongStreamURL,
-      } as Song);
-    } else return;
-    const voiceConnection = this._queue.get(this.guild.id)?.connection;
-    const player = createAudioPlayer({
-      behaviors: {
-        noSubscriber: ('pause' || 'play') as NoSubscriberBehavior,
-      },
-    });
-    const resource = createAudioResource(this._createWritableStream(extractedSongStreamURL) as any, {
-      inputType: 'opus' as StreamType,
-    });
-    voiceConnection?.subscribe(player);
-    player.play(resource);
+      const resource = createAudioResource(this._createWritableStream(extractedSongStreamURL) as any, {
+        inputType: 'opus' as StreamType,
+      });
+      voiceConnection?.subscribe(player);
+      player.play(resource);
+      currentQueue.playing = !currentQueue.playing ?? true;
+      this.emit('trackStart', (currentQueue.textChannel, currentQueue.songs[0]))
+    }
   }
 
   private _createWritableStream(url: string): NodeJS.WritableStream {
@@ -104,7 +121,7 @@ export class Player extends EventEmitter {
         }),
         opusEncoder,
       ],
-      () => {},
+      dwayneTheBlock
     );
   }
 

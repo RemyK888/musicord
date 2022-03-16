@@ -33,6 +33,7 @@ export class Musicord {
         songs: [],
         volume: options.advancedOptions?.volume ?? 0.5,
         playing: false,
+        filters: []
       });
     else {
       const currentQueue = this.queue.get(guild.id);
@@ -46,7 +47,7 @@ export class Musicord {
           volume:
             typeof currentQueue?.volume !== 'undefined' ? currentQueue.volume : options.advancedOptions?.volume ?? 0.5,
           playing: false,
-          filters: currentQueue?.filters ?? undefined,
+          filters: currentQueue?.filters ?? [],
         });
     }
     return new Player(this.queue, guild);
