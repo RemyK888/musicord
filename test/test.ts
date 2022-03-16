@@ -59,18 +59,24 @@ const body = {
 
 import { request } from 'undici';
 
+/*
 (async () => {
-   /* const { body } = await request('https://www.youtube.com/youtubei/v1/player?key=AIzaSyCjc_pVEDi4qsv5MtC2dMXzpIaDoRFLsxw', {
+    const { body } = await request('https://www.youtube.com/youtubei/v1/player?key=AIzaSyCjc_pVEDi4qsv5MtC2dMXzpIaDoRFLsxw', {
         method: 'POST',
         body: JSON.stringify(body),
         headers: { 'Content-Type': 'application/json' }
     });
     const data = await response.json();
     //console.log(data)
-    console.log(data.streamingData.formats.slice(-1)[0].url); */
+    console.log(data.streamingData.formats.slice(-1)[0].url); 
 
     const { body } = await request('https://www.youtube.com?hl=en');
     const jsonData = JSON.parse((/ytcfg.set\(({.+?})\)/s.exec(await body.text()) as RegExpExecArray)[1]);
 
     console.log(jsonData);
 })();
+*/
+
+import { audioPattern } from '../src/utils/Constants';
+
+console.log(audioPattern.test('http://ccmixter.org/content/Lav/Lav_-_dark_quiet_night_(war_in_europe_2022_edition).mp3'))

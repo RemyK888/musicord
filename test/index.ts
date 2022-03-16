@@ -34,6 +34,8 @@ const rest = new REST({ version: '10' }).setToken('NzU3MTQzOTIzODM4OTQzMzE0.X2cH
   }
 })();
 
+*/
+
 import { Client } from 'discord.js';
 
 import { Musicord, AudioFilters } from '../src/index';
@@ -68,15 +70,17 @@ client.on('messageCreate', (message) => {
       const queue = musicordPlayer.initQueue(message.guild, {
         textChannel: message.channel,
         voiceChannel: message.member.voice.channel
-      }).play('sdf', message.member.voice.channel)
+      })
+      queue.setFilter(AudioFilters.rotatingAudio);
+      queue.play('https://www.youtube.com/watch?v=wBRsDOjcye4', message.member.voice.channel);
     }
   }
 })
 
 
-client.login('NzI2NTEwNjE3MDQ5MTcwMDAx.XveVvQ.02Tiq0jHIoh1YOz2a500CJO2dBQ')
+client.login('NzU3MTQzOTIzODM4OTQzMzE0.X2cHOg.UNdXyrY2zlnHmsaK-QHjsb17rm8')
 
-*/
+/*
 
 import { SongSearcher } from '../src/index';
 
@@ -84,10 +88,11 @@ const songSearcher = new SongSearcher();
 
 
 (async () => {
-  /*const songs = await songSearcher.search('end of the beginning central cee', {
+  const songs = await songSearcher.search('end of the beginning central cee', {
     maxResults: 2
   });
-  console.log(songs[0])*/
+  console.log(songs[0])
   const song = await songSearcher.extractVideoInfo('https://www.youtube.com/watch?v=O4v1Mwyg-GM');
   //console.log(song)
 })();
+*/

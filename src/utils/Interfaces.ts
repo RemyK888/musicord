@@ -111,4 +111,5 @@ export interface QueueOptions {
   songs?: Song[];
   volume?: number;
   playing?: boolean;
+  filters?: string[];
 }

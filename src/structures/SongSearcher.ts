@@ -7,7 +7,7 @@ import {
   innerTubeApiURL,
   youTubeVideoURL,
   youTubeChannelURL,
-  InnterTubeAndroidContext,
+  InnerTubeAndroidContext,
 } from '../utils/Constants';
 
 export class SongSearcher {
@@ -35,7 +35,6 @@ export class SongSearcher {
     });
     const returnData: SearchedSong[] = [];
     const jsonData = await body.json();
-
     for (const content of jsonData.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer
       .contents) {
       if (content.itemSectionRenderer) {
@@ -131,7 +130,7 @@ export class SongSearcher {
     const videoId = url.match(
       /(?:https?:\/\/)?(?:www\.|m\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\/?\?v=|\/embed\/|\/)([^\s&\?\/\#]+)/,
     )![1];
-    return Object.assign(InnterTubeAndroidContext, { videoId });
+    return Object.assign(InnerTubeAndroidContext, { videoId });
   }
 
   /**
@@ -140,7 +139,7 @@ export class SongSearcher {
    * @returns {string}
    * @private
    */
-  private _humanizeSeconds(s: number): string {
-    return (s - (s %= 60)) / 60 + (9 < s ? ':' : ':0') + s;
+  private _humanizeSeconds(secs: number): string {
+    return (secs - (secs %= 60)) / 60 + (9 < secs ? ':' : ':0') + secs;
   }
 }

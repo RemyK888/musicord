@@ -1,10 +1,9 @@
-import { EventEmitter } from 'events';
 import { Guild, Client } from 'discord.js';
 
 import { InitQueueOptions, MusicordOptions, QueueOptions } from '../utils/Interfaces';
 import { Player } from './Player';
 
-export class Musicord extends EventEmitter {
+export class Musicord {
   public readonly client: Client;
   public readonly options: MusicordOptions | {} = {};
   public readonly queue: Map<string, QueueOptions> = new Map();
@@ -15,7 +14,6 @@ export class Musicord extends EventEmitter {
    * @param {MusicordOptions} options Musicord options
    */
   constructor(client: Client, options?: MusicordOptions) {
-    super();
     if (!client || client instanceof Client === false) throw new TypeError('');
     if (options && ('ytApiKey' in options || (<MusicordOptions>(<unknown>options)).ytApiKey !== undefined))
       this.options = options;
@@ -44,10 +42,11 @@ export class Musicord extends EventEmitter {
           textChannel: options.textChannel,
           voiceChannel: options.voiceChannel,
           connection: null,
-          songs: [],
+          songs: currentQueue?.songs ?? [],
           volume:
             typeof currentQueue?.volume !== 'undefined' ? currentQueue.volume : options.advancedOptions?.volume ?? 0.5,
           playing: false,
+          filters: currentQueue?.filters ?? undefined,
         });
     }
     return new Player(this.queue, guild);
