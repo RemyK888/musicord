@@ -2,13 +2,6 @@ import { FFmpegCustomEqualizerOptions } from '../utils/Interfaces';
 
 export class FFmpegAudioFilters {
   /**
-   * Ultra bass boost filter
-   */
-  get ultraBassBoost(): string {
-    return 'asubboost=dry=1:wet=1';
-  }
-
-  /**
    * 8D audio
    */
   get rotatingAudio(): string {
@@ -75,6 +68,11 @@ export class FFmpegAudioFilters {
   public speed(value: number): string {
     if (!value || !this.isBetween(value, 50, 1000)) throw new TypeError('');
     return `atempo${value / 100}`;
+  }
+
+  public bassBoost(amount: number): string {
+    if(!amount || typeof amount !== 'number') throw new TypeError('');
+    return `bass=g=${amount}:f=110:w=0.3`;
   }
 
   /**

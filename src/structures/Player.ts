@@ -7,6 +7,9 @@ import {
   createAudioPlayer,
   createAudioResource,
   StreamType,
+  AudioPlayerStatus,
+  AudioPlayer,
+  entersState
 } from '@discordjs/voice';
 import prism from 'prism-media';
 import { pipeline } from 'stream';
@@ -38,10 +41,19 @@ export class Player extends EventEmitter {
     if (currentQueue) currentQueue.connection = connection;
   }
 
-  public addSong(song: Song) {
-    if (!song || !('url' in song)) throw new TypeError('');
+  public async addSong(song: Song | string) {
+    if (!song) throw new TypeError('');
     const currentQueue = this._queue.get(this.guild.id);
-    if (currentQueue && currentQueue.songs) currentQueue.songs.push(song);
+    if (currentQueue && currentQueue.songs) {
+      if (typeof song === 'string' && youTubePattern.test(song)) {
+        const extractedVideo = await this._songSearcher.extractVideoInfo(song);
+        currentQueue.songs.push(extractedVideo);
+      } else if (typeof song === 'string' && audioPattern.test(song)) {
+        currentQueue.songs.push({
+          url: song, streamURL: song
+        } as Song);
+      } else return;
+    }
   }
 
   public createVoiceConnection(): void {
@@ -67,48 +79,71 @@ export class Player extends EventEmitter {
 
   public resetFilters() {
     const currentQueue = this._queue.get(this.guild.id)
-    if (currentQueue) {
-      currentQueue.filters = [];
-    } else return;
+    if (currentQueue) currentQueue.filters = [];
+    else return;
+  }
+
+  public nextSong() {
+    const currentQueue = this._queue.get(this.guild.id)
+    if (currentQueue && currentQueue.songs && Object.entries(currentQueue.songs).length >= 1) {
+      return currentQueue.songs[0].url;
+    }
   }
 
   public async play(song: Song | string, channel?: VoiceChannel | StageChannel): Promise<void> {
     if (!song) throw new TypeError('');
-    const currentQueue = this._queue.get(this.guild.id);
+    let currentQueue = this._queue.get(this.guild.id);
     if (currentQueue) {
-      if (currentQueue.connection === (null || undefined) && !channel && !currentQueue.voiceChannel) return;
-      if (currentQueue && !currentQueue.connection) {
-        currentQueue.connection = joinVoiceChannel({
-          channelId: (currentQueue.voiceChannel?.id ?? channel) as string,
-          guildId: this.guild.id,
-          adapterCreator: this.guild.voiceAdapterCreator,
-        });
+      if (currentQueue.playing === true) return await this.addSong(typeof song === 'string' ? song : song.url);
+      if (!(currentQueue.connection instanceof VoiceConnection)) {
+        if (channel || currentQueue.voiceChannel !== undefined) {
+          currentQueue.connection = joinVoiceChannel({
+            guildId: this.guild.id,
+            channelId: (currentQueue.voiceChannel !== undefined ? currentQueue.voiceChannel.id : channel?.id) as string,
+            adapterCreator: this.guild.voiceAdapterCreator
+          })
+        } else return;
       }
-      let extractedSongStreamURL: string = '';
-      if (typeof song === 'string' && youTubePattern.test(song)) {
-        const extractedVideo = await this._songSearcher.extractVideoInfo(song);
-        extractedSongStreamURL = extractedVideo.streamURL;
-        currentQueue.songs.push(extractedVideo);
-      } else if (typeof song === 'string' && audioPattern.test(song)) {
-        extractedSongStreamURL = song;
-        currentQueue.songs.push({
-          url: extractedSongStreamURL,
-        } as Song);
-      } else return;
-      const voiceConnection = this._queue.get(this.guild.id)?.connection;
+      if (currentQueue.songs === [] || currentQueue.songs[0]?.url !== song) await this.addSong(typeof song === 'string' ? song : song.url);
       const player = createAudioPlayer({
         behaviors: {
           noSubscriber: ('pause' || 'play') as NoSubscriberBehavior,
         },
       });
-      const resource = createAudioResource(this._createWritableStream(extractedSongStreamURL) as any, {
+      const audioResource = createAudioResource(this._createWritableStream(currentQueue.songs[0].streamURL) as any, {
         inputType: 'opus' as StreamType,
+        inlineVolume: true
       });
-      voiceConnection?.subscribe(player);
-      player.play(resource);
-      currentQueue.playing = !currentQueue.playing ?? true;
-      this.emit('trackStart', (currentQueue.textChannel, currentQueue.songs[0]))
+      currentQueue.connection?.subscribe(player);
+      player.play(audioResource);
+      currentQueue.playing = true;
+     /* setTimeout(() => {
+        // @ts-ignore
+        audioResource.volume.setVolumeLogarithmic(200)
+      }, 5000); */
+      try {
+        await entersState(player, AudioPlayerStatus.Playing, 5000);
+      } catch (error) {
+        throw new Error(error as string);
+      }
+      this._handleVoiceState(player);
     }
+  }
+
+  private _handleVoiceState(player: AudioPlayer) {
+    player.on(AudioPlayerStatus.Idle, (oldState, newState) => {
+      let currentQueue = this._queue.get(this.guild.id);
+      if (oldState.status === AudioPlayerStatus.Playing && newState.status === AudioPlayerStatus.Idle) {
+        if (currentQueue) {
+          currentQueue.playing = false;
+          currentQueue.songs.shift();
+          if (Object.keys(currentQueue.songs).length === 0) {
+            currentQueue.connection?.destroy();
+            currentQueue.connection = undefined;
+          } else return this.play(currentQueue.songs[0].url as string);
+        };
+      }
+    })
   }
 
   private _createWritableStream(url: string): NodeJS.WritableStream {
@@ -125,10 +160,10 @@ export class Player extends EventEmitter {
     );
   }
 
-  private _generateFFmpegArgsSchema(url: string, FFmpegArgs = DefaultFFmpegArgs): string[] {
+  private _generateFFmpegArgsSchema(url: string): string[] {
+    const FFmpegArgs = ['-reconnect', '1', '-reconnect_streamed', '1', '-reconnect_delay_max', '5']
     FFmpegArgs.push('-i', url, '-analyzeduration', '0', '-loglevel', '0', '-f', 's16le', '-ar', '48000', '-ac', '2');
     const currentQueue = this._queue.get(this.guild.id);
-    console.log(currentQueue);
     if (currentQueue && currentQueue.filters) {
       for (const filter of currentQueue.filters) {
         FFmpegArgs.push('-af', filter);

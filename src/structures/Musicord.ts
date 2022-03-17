@@ -28,7 +28,7 @@ export class Musicord {
       this.queue.set(guild.id, {
         guild: guild,
         textChannel: options.textChannel,
-        voiceChannel: options.voiceChannel,
+        voiceChannel: options.voiceChannel ?? undefined,
         connection: null,
         songs: [],
         volume: options.advancedOptions?.volume ?? 0.5,
@@ -41,7 +41,7 @@ export class Musicord {
         this.queue.set(guild.id, {
           guild: guild,
           textChannel: options.textChannel,
-          voiceChannel: options.voiceChannel,
+          voiceChannel: options.voiceChannel ?? undefined,
           connection: null,
           songs: currentQueue?.songs ?? [],
           volume:
@@ -53,8 +53,17 @@ export class Musicord {
     return new Player(this.queue, guild);
   }
 
-  public getQueue(guild: Guild): QueueOptions | undefined {
+  public existQueue(guild: Guild): boolean {
+    return this.queue.has(guild.id);
+  }
+
+  public getQueue(guild: Guild): Player | undefined {
     if (!guild || guild instanceof Guild == false) throw new TypeError('');
+    if (this.existQueue(guild)) return new Player(this.queue, guild);
+    else return undefined;
+  }
+
+  public getQueueInfo(guild: Guild): QueueOptions | undefined {
     return this.queue.get(guild.id);
   }
 }

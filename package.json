@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/RemyK888/musicord#readme",
   "dependencies": {
-    "@discordjs/voice": "^0.9.0-dev.1646654924.b162f27",
+    "@discordjs/voice": "^0.9.0-dev.1647259738.2297c2b",
     "discord.js": "^14.0.0-dev.1645876999.a8321d8",
     "ffmpeg-static": "^4.4.1",
     "prism-media": "^1.3.2",
