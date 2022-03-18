@@ -71,7 +71,7 @@ export class FFmpegAudioFilters {
   }
 
   public bassBoost(amount: number): string {
-    if(!amount || typeof amount !== 'number') throw new TypeError('');
+    if (!amount || typeof amount !== 'number') throw new TypeError('');
     return `bass=g=${amount}:f=110:w=0.3`;
   }
 

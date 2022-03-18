@@ -9,16 +9,16 @@ import {
   StreamType,
   AudioPlayerStatus,
   AudioPlayer,
-  entersState
+  entersState,
 } from '@discordjs/voice';
 import prism from 'prism-media';
 import { pipeline } from 'stream';
 
 import { SongSearcher } from './SongSearcher';
-import { QueueOptions, Song } from '../utils/Interfaces';
-import { youTubePattern, audioPattern, DefaultFFmpegArgs } from '../utils/Constants';
+import { QueueOptions, Range, Song } from '../utils/Interfaces';
+import { youTubePattern, audioPattern } from '../utils/Constants';
 
-const dwayneTheBlock = () => { };
+const dwayneTheBlock = () => {};
 
 export class Player extends EventEmitter {
   public guild: Guild;
@@ -41,7 +41,7 @@ export class Player extends EventEmitter {
     if (currentQueue) currentQueue.connection = connection;
   }
 
-  public async addSong(song: Song | string) {
+  public async addSong(song: Song | string): Promise<void> {
     if (!song) throw new TypeError('');
     const currentQueue = this._queue.get(this.guild.id);
     if (currentQueue && currentQueue.songs) {
@@ -50,7 +50,8 @@ export class Player extends EventEmitter {
         currentQueue.songs.push(extractedVideo);
       } else if (typeof song === 'string' && audioPattern.test(song)) {
         currentQueue.songs.push({
-          url: song, streamURL: song
+          url: song,
+          streamURL: song,
         } as Song);
       } else return;
     }
@@ -77,37 +78,55 @@ export class Player extends EventEmitter {
     }
   }
 
-  public resetFilters() {
-    const currentQueue = this._queue.get(this.guild.id)
+  public resetFilters(): void {
+    const currentQueue = this._queue.get(this.guild.id);
     if (currentQueue) currentQueue.filters = [];
     else return;
   }
 
-  public nextSong() {
-    const currentQueue = this._queue.get(this.guild.id)
+  public nextSong(): string | undefined {
+    const currentQueue = this._queue.get(this.guild.id);
     if (currentQueue && currentQueue.songs && Object.entries(currentQueue.songs).length >= 1) {
       return currentQueue.songs[0].url;
     }
   }
 
-  public stop() {
-    let currentQueue = this._queue.get(this.guild.id);
-    currentQueue?.connection?.destroy()
-    // @ts-ignore
-    currentQueue.playing = false;
-    // @ts-ignore
-    currentQueue.connection = undefined;
-    // @ts-ignore
-    currentQueue.songs = []
-    // @ts-ignore
-    currentQueue.ressource = []
+  public stop(): void {
+    const currentQueue = this._queue.get(this.guild.id);
+    if (currentQueue) {
+      currentQueue.connection?.destroy();
+      currentQueue.playing = false;
+      currentQueue.connection = undefined;
+      currentQueue.songs = [];
+      currentQueue.ressource = undefined;
+    }
   }
 
-  public setVolume(volume:number) {
-    let currentQueue = this._queue.get(this.guild.id);
-    currentQueue?.ressource.volume.setVolumeLogarithmic(volume)
-    //@ts-ignore
-    currentQueue.volume = volume
+  public pause(): void {
+    const currentQueue = this._queue.get(this.guild.id);
+    if (currentQueue && currentQueue.ressource) {
+      if (currentQueue.ressource.audioPlayer?.state.status === AudioPlayerStatus.Playing)
+        currentQueue.ressource.audioPlayer?.pause(true);
+    }
+  }
+
+  public resume(): void {
+    const currentQueue = this._queue.get(this.guild.id);
+    if (currentQueue && currentQueue.ressource) {
+      if (
+        currentQueue.ressource.audioPlayer?.state.status === AudioPlayerStatus.Paused ||
+        currentQueue.ressource.audioPlayer?.state.status === AudioPlayerStatus.AutoPaused
+      )
+        currentQueue.ressource.audioPlayer?.unpause();
+    }
+  }
+
+  public setVolume(volume: Range<0, 101>): void {
+    const currentQueue = this._queue.get(this.guild.id);
+    if (currentQueue) {
+      currentQueue.ressource?.volume?.setVolumeLogarithmic(volume * 2);
+      currentQueue.volume = volume;
+    }
   }
 
   public async play(song: Song | string, channel?: VoiceChannel | StageChannel): Promise<void> {
@@ -120,11 +139,12 @@ export class Player extends EventEmitter {
           currentQueue.connection = joinVoiceChannel({
             guildId: this.guild.id,
             channelId: (currentQueue.voiceChannel !== undefined ? currentQueue.voiceChannel.id : channel?.id) as string,
-            adapterCreator: this.guild.voiceAdapterCreator
-          })
+            adapterCreator: this.guild.voiceAdapterCreator,
+          });
         } else return;
       }
-      if (currentQueue.songs === [] || currentQueue.songs[0]?.url !== song) await this.addSong(typeof song === 'string' ? song : song.url);
+      if (currentQueue.songs === [] || currentQueue.songs[0]?.url !== song)
+        await this.addSong(typeof song === 'string' ? song : song.url);
       const player = createAudioPlayer({
         behaviors: {
           noSubscriber: ('pause' || 'play') as NoSubscriberBehavior,
@@ -132,11 +152,12 @@ export class Player extends EventEmitter {
       });
       currentQueue.ressource = createAudioResource(this._createWritableStream(currentQueue.songs[0].streamURL) as any, {
         inputType: 'opus' as StreamType,
-        inlineVolume: true
+        inlineVolume: true,
       });
-      currentQueue.ressource.volume.setVolumeLogarithmic(currentQueue.volume)
+      currentQueue.ressource.volume?.setVolumeLogarithmic(currentQueue.volume * 2);
       currentQueue.connection?.subscribe(player);
       player.play(currentQueue.ressource);
+      console.log(currentQueue.ressource?.encoder);
       currentQueue.playing = true;
       try {
         await entersState(player, AudioPlayerStatus.Playing, 5000);
@@ -157,11 +178,11 @@ export class Player extends EventEmitter {
           if (Object.keys(currentQueue.songs).length === 0) {
             currentQueue.connection?.destroy();
             currentQueue.connection = undefined;
-            currentQueue.ressource = []
+            currentQueue.ressource = undefined;
           } else return this.play(currentQueue.songs[0].url as string);
-        };
+        }
       }
-    })
+    });
   }
 
   private _createWritableStream(url: string): NodeJS.WritableStream {
@@ -174,12 +195,12 @@ export class Player extends EventEmitter {
         }),
         opusEncoder,
       ],
-      dwayneTheBlock
+      dwayneTheBlock,
     );
   }
 
   private _generateFFmpegArgsSchema(url: string): string[] {
-    const FFmpegArgs = ['-reconnect', '1', '-reconnect_streamed', '1', '-reconnect_delay_max', '5']
+    const FFmpegArgs = ['-reconnect', '1', '-reconnect_streamed', '1', '-reconnect_delay_max', '5'];
     FFmpegArgs.push('-i', url, '-analyzeduration', '0', '-loglevel', '0', '-f', 's16le', '-ar', '48000', '-ac', '2');
     const currentQueue = this._queue.get(this.guild.id);
     if (currentQueue && currentQueue.filters) {

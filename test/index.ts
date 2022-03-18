@@ -28,6 +28,14 @@ const commandsSchema = new ApplicationCommandSchema({
       required: true,
       type: 3
     }
+  },
+  pause: {
+    description: 'Mettre la musique en pause',
+    implemented: true
+  },
+  resume: {
+    description: 'Reprendre la musique en cours',
+    implemented: true
   }
 });
 
@@ -82,7 +90,10 @@ client.on('interactionCreate', async (interaction) => {
             textChannel: interaction.channel as AnyChannel,
             voiceChannel: msgMember.voice.channel
           })
-          if (queue) await queue.play(msgArgs as any, msgMember.voice.channel)
+          if (queue) { 
+            queue.setFilter(AudioFilters.rotatingAudio)
+            await queue.play(msgArgs as any, msgMember.voice.channel) 
+          }
           const queueInfo = musicordPlayer.getQueueInfo(interaction.guild as Guild);
           if (queueInfo) interaction.reply(`En train de jouer ${queueInfo.songs[0].title}`)
         }
@@ -104,6 +115,22 @@ client.on('interactionCreate', async (interaction) => {
         // @ts-ignore
         queue.setVolume(msgArgs/100)
         interaction.reply('Le volume a bien été changé')
+      }
+    }
+    else if(interaction.commandName === 'pause') {
+      if (musicordPlayer.existQueue(interaction.guild as Guild)) {
+        const queue = musicordPlayer.getQueue(interaction.guild as Guild);
+        // @ts-ignore
+        queue.pause();
+        interaction.reply('La musique a bien été mise en pause')
+      }
+    }
+    else if(interaction.commandName === 'resume') {
+      if (musicordPlayer.existQueue(interaction.guild as Guild)) {
+        const queue = musicordPlayer.getQueue(interaction.guild as Guild);
+        // @ts-ignore
+        queue.resume()
+        interaction.reply('La musique a bien été remise en route')
       }
     }
   } else return

@@ -1,4 +1,4 @@
-import { VoiceConnection } from '@discordjs/voice';
+import { AudioResource, VoiceConnection } from '@discordjs/voice';
 import { Channel, VoiceChannel, ThreadChannel, AnyChannel, Guild, VoiceBasedChannel, StageChannel } from 'discord.js';
 
 export interface MusicordOptions {
@@ -21,6 +21,7 @@ export interface ApplicationCommandSchemaOptions {
   pause?: CommandOptions;
   stop?: CommandOptions;
   setvolume?: CommandOptions;
+  resume?: CommandOptions;
 }
 
 type DJSSlashCommandsType = 'STRING' | 'BOOLEAN' | 'NUMBER' | 'CHANNEL';
@@ -114,9 +115,9 @@ export interface QueueOptions {
   volume: number;
   playing?: boolean;
   filters: string[];
-  ressource?: any;
+  ressource?: AudioResource<any> | undefined;
 }
 
 export interface PlayerEventsList {
-  trackStart: string
+  trackStart: string;
 }
