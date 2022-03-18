@@ -99,6 +99,8 @@ export class Player extends EventEmitter {
     currentQueue.connection = undefined;
     // @ts-ignore
     currentQueue.songs = []
+    // @ts-ignore
+    currentQueue.ressource = []
   }
 
   public setVolume(volume:number) {
@@ -155,6 +157,7 @@ export class Player extends EventEmitter {
           if (Object.keys(currentQueue.songs).length === 0) {
             currentQueue.connection?.destroy();
             currentQueue.connection = undefined;
+            currentQueue.ressource = []
           } else return this.play(currentQueue.songs[0].url as string);
         };
       }
