@@ -14,17 +14,31 @@ const commandsSchema = new ApplicationCommandSchema({
       required: true,
       type: 3
     }
+  },
+  stop: {
+    description: 'Arreter la musique en cours',
+    implemented: true,
+  },
+  setvolume: {
+    description: 'Changer le Volume de la musique en cours',
+    implemented: true,
+    options: {
+      name: 'volume',
+      description: 'Volume désiré entre 1 et 100',
+      required: true,
+      type: 3
+    }
   }
 });
 
-const rest = new REST({ version: '10' }).setToken('NzU3MTQzOTIzODM4OTQzMzE0.X2cHOg.8TmOwUm8lWJUYP7e88oLNjiMDhk');
+const rest = new REST({ version: '10' }).setToken('NzI2NTEwNjE3MDQ5MTcwMDAx.XveVvQ.Bf5AZEARQNhnIF3AKALa108eJSs');
 
 (async () => {
   try {
     console.log('Started refreshing application [/] commands.');
 
     await rest.put(
-      Routes.applicationGuildCommands('757143923838943314', '715924331682594959'),
+      Routes.applicationGuildCommands('726510617049170001', '715924331682594959'),
       { body: commandsSchema.extract() },
     )
 
@@ -50,28 +64,46 @@ const musicordPlayer = new Musicord(client, {
 
 // @ts-ignore
 client.on('interactionCreate', async (interaction) => {
-  if(interaction && interaction.isCommand()) {
-    if(interaction.commandName === 'play') {
+  if (interaction && interaction.isCommand()) {
+    if (interaction.commandName === 'play') {
       const msgArgs = interaction.options.get('lien')?.value
-      if(!msgArgs) return interaction.reply('Pas d\'argument inséré');
+      if (!msgArgs) return interaction.reply('Pas d\'argument inséré');
       // @ts-ignore
       const msgMember = interaction.guild.members.cache.get(interaction.member.user.id);
       // @ts-ignore
-      if(msgMember && msgMember.voice.channel) {
+      if (msgMember && msgMember.voice.channel) {
         if (musicordPlayer.existQueue(interaction.guild as Guild)) {
           const queue = musicordPlayer.getQueue(interaction.guild as Guild);
-          if(queue) await queue.play(msgArgs as any, msgMember.voice.channel);
+          if (queue) await queue.play(msgArgs as any, msgMember.voice.channel);
           const queueInfo = musicordPlayer.getQueueInfo(interaction.guild as Guild);
-          if(queueInfo) interaction.reply(`En train de jouer ${queueInfo.songs[0].title}`)
+          if (queueInfo) interaction.reply(`En train de jouer ${queueInfo.songs[0].title}`)
         } else {
           const queue = musicordPlayer.initQueue(interaction.guild as Guild, {
             textChannel: interaction.channel as AnyChannel,
             voiceChannel: msgMember.voice.channel
           })
-          if(queue) await queue.play(msgArgs as any, msgMember.voice.channel)
+          if (queue) await queue.play(msgArgs as any, msgMember.voice.channel)
           const queueInfo = musicordPlayer.getQueueInfo(interaction.guild as Guild);
-          if(queueInfo) interaction.reply(`En train de jouer ${queueInfo.songs[0].title}`)
+          if (queueInfo) interaction.reply(`En train de jouer ${queueInfo.songs[0].title}`)
         }
+      }
+    } else if (interaction.commandName === 'stop') {
+      if (musicordPlayer.existQueue(interaction.guild as Guild)) {
+        const queue = musicordPlayer.getQueue(interaction.guild as Guild);
+        // @ts-ignore
+        queue.stop()
+        interaction.reply('La musique a bien été arrêtée')
+      }
+    } else if (interaction.commandName === 'setvolume') {
+      const msgArgs:any = interaction.options.get('volume')?.value
+      if (!msgArgs) return interaction.reply('Pas d\'argument inséré');
+      if (isNaN(msgArgs)) return interaction.reply('Le volume doit être un nombre compris entre 0 et 100')
+      if (msgArgs < 0 || msgArgs > 100) return interaction.reply('Le volume doit être un nombre compris entre 0 et 100')
+      if (musicordPlayer.existQueue(interaction.guild as Guild)) {
+        const queue = musicordPlayer.getQueue(interaction.guild as Guild);
+        // @ts-ignore
+        queue.setVolume(msgArgs/100)
+        interaction.reply('Le volume a bien été changé')
       }
     }
   } else return
@@ -110,7 +142,7 @@ client.on('messageCreate', (message) => {
 */
 
 
-client.login('NzU3MTQzOTIzODM4OTQzMzE0.X2cHOg.8TmOwUm8lWJUYP7e88oLNjiMDhk')
+client.login('NzI2NTEwNjE3MDQ5MTcwMDAx.XveVvQ.Bf5AZEARQNhnIF3AKALa108eJSs')
 
 /*
 

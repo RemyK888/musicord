@@ -90,6 +90,22 @@ export class Player extends EventEmitter {
     }
   }
 
+  public stop() {
+    let currentQueue = this._queue.get(this.guild.id);
+    currentQueue?.connection?.destroy()
+    // @ts-ignore
+    currentQueue.playing = false;
+    // @ts-ignore
+    currentQueue.connection = undefined;
+    // @ts-ignore
+    currentQueue.songs = []
+  }
+
+  public setVolume(volume:number) {
+    let currentQueue = this._queue.get(this.guild.id);
+    currentQueue?.ressource.volume.setVolumeLogarithmic(volume)
+  }
+
   public async play(song: Song | string, channel?: VoiceChannel | StageChannel): Promise<void> {
     if (!song) throw new TypeError('');
     let currentQueue = this._queue.get(this.guild.id);
@@ -110,17 +126,14 @@ export class Player extends EventEmitter {
           noSubscriber: ('pause' || 'play') as NoSubscriberBehavior,
         },
       });
-      const audioResource = createAudioResource(this._createWritableStream(currentQueue.songs[0].streamURL) as any, {
+      currentQueue.ressource = createAudioResource(this._createWritableStream(currentQueue.songs[0].streamURL) as any, {
         inputType: 'opus' as StreamType,
         inlineVolume: true
       });
+      currentQueue.ressource.volume.setVolumeLogarithmic(currentQueue.volume)
       currentQueue.connection?.subscribe(player);
-      player.play(audioResource);
+      player.play(currentQueue.ressource);
       currentQueue.playing = true;
-     /* setTimeout(() => {
-        // @ts-ignore
-        audioResource.volume.setVolumeLogarithmic(200)
-      }, 5000); */
       try {
         await entersState(player, AudioPlayerStatus.Playing, 5000);
       } catch (error) {

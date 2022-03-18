@@ -19,6 +19,8 @@ export interface CommandOptions {
 export interface ApplicationCommandSchemaOptions {
   play?: CommandOptions;
   pause?: CommandOptions;
+  stop?: CommandOptions;
+  setvolume?: CommandOptions;
 }
 
 type DJSSlashCommandsType = 'STRING' | 'BOOLEAN' | 'NUMBER' | 'CHANNEL';
@@ -109,9 +111,10 @@ export interface QueueOptions {
   voiceChannel?: VoiceBasedChannel | VoiceChannel | StageChannel;
   connection?: VoiceConnection | null;
   songs: Song[];
-  volume?: number;
+  volume: number;
   playing?: boolean;
   filters: string[];
+  ressource?: any;
 }
 
 export interface PlayerEventsList {
