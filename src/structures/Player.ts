@@ -104,6 +104,8 @@ export class Player extends EventEmitter {
   public setVolume(volume:number) {
     let currentQueue = this._queue.get(this.guild.id);
     currentQueue?.ressource.volume.setVolumeLogarithmic(volume)
+    //@ts-ignore
+    currentQueue.volume = volume
   }
 
   public async play(song: Song | string, channel?: VoiceChannel | StageChannel): Promise<void> {
