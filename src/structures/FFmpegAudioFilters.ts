@@ -61,17 +61,25 @@ export class FFmpegAudioFilters {
   }
 
   /**
-   * Speed up/down the music
+   * Speed sup/down the music
    * @param {number} value The speed value *(between 50% and 1000%)*
    * @returns {string}
    */
   public speed(value: number): string {
-    if (!value || !this.isBetween(value, 50, 1000)) throw new TypeError('');
+    if (!value || !this._isBetween(value, 50, 1000)) throw new TypeError('');
     return `atempo${value / 100}`;
   }
 
+  /**
+   * basSSssS goes bRRRRR
+   * @param {number} amount Boost intensity
+   * @returns {string}
+   * @example
+   * queue.setFilters(AudioFilters.bassBoost(20));
+   */
   public bassBoost(amount: number): string {
-    if (!amount || typeof amount !== 'number') throw new TypeError('');
+    if (!amount || typeof amount !== 'number')
+      throw new TypeError('A numerical value is expected in order to generate the filter');
     return `bass=g=${amount}:f=110:w=0.3`;
   }
 
@@ -81,12 +89,12 @@ export class FFmpegAudioFilters {
    * @returns {string}
    */
   public tremolo(value: number): string {
-    if (!value || !this.isBetween(value, 0.1, 20000)) throw new TypeError('');
+    if (!value || !this._isBetween(value, 0.1, 20000)) throw new TypeError('');
     return `tremolo${value}`;
   }
 
   /**
-   * Set the volume (FFmpeg filter, not Discord bot volume)
+   * Sets the volume (FFmpeg filter, not Discord bot volume)
    * @param {number} value The volume (no limit)
    * @returns {number}
    */
@@ -131,7 +139,7 @@ export class FFmpegAudioFilters {
   }
 
   /**
-   * Add a custom filter
+   * Adds a custom filter
    * @param {string} filter The filter
    * @returns {string}
    */
@@ -141,14 +149,14 @@ export class FFmpegAudioFilters {
   }
 
   /**
-   * Check if a value is within a range of numbers
+   * Checks if a value is within a range of numbers
    * @param {number} n The number to check
    * @param {number} min The min number
    * @param {number} max The max number
    * @returns {boolean}
    * @private
    */
-  private isBetween(n: number | any, min: number, max: number): boolean {
+  private _isBetween(n: number | any, min: number, max: number): boolean {
     return n >= min && n <= max;
   }
 }

@@ -22,3 +22,17 @@ export const InnerTubeAndroidContext = {
 };
 
 export const DefaultFFmpegArgs = ['-reconnect', '1', '-reconnect_streamed', '1', '-reconnect_delay_max', '5'];
+
+export enum ExtendedAudioPlayerStatus {
+  Error = 'error',
+  Debug = 'debug',
+  Suscribe = 'suscribe',
+  Unsuscribe = 'unsuscribe',
+  StateChange = 'stateChange',
+}
+
+export enum PlayerEvents {
+  Error = 'error',
+  Debug = 'debug',
+  TrackStart = 'trackStart',
+}

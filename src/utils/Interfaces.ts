@@ -46,6 +46,7 @@ export interface InitQueueOptions {
   textChannel: Channel | ThreadChannel | AnyChannel;
   voiceChannel?: VoiceBasedChannel | VoiceChannel | StageChannel;
   advancedOptions?: {
+    autoJoin?: boolean;
     volume?: Range<0, 101>;
   };
 }
@@ -99,6 +100,16 @@ export interface SearchedSong {
     url: string;
     title: string;
     thumbnails: ThumbnailsOptions[];
+  };
+}
+
+export interface SongSearcherOptions {
+  customInnertubeContext: {
+    client: string;
+    gl: string;
+    clientName: 'WEB' | string;
+    clientVersion: string;
+    utcOffsetMinutes: 0 | number;
   };
 }
 

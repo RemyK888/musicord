@@ -4,7 +4,7 @@ export class ApplicationCommandSchema {
   public readonly commands: ApplicationCommandSchemaOptions;
 
   /**
-   * Create a new ApplicationCommandSchema
+   * Creates a new ApplicationCommandSchema.
    * @param {ApplicationCommandSchemaOptions} options ApplicationCommandSchema options
    * @constructor
    * @example
@@ -26,7 +26,7 @@ export class ApplicationCommandSchema {
   }
 
   /**
-   * Extract slash commands formatted for DJS
+   * Extracts slash commands formatted for DJS.
    * @returns {DJSApplicationCommandSchema[] | []}
    * @example
    * await rest.put(Routes.applicationGuildCommands('clientID', 'guildID'), { body: commandsSchema.extract() });
@@ -50,7 +50,7 @@ export class ApplicationCommandSchema {
                   name: slashCommandsValues[slashCommandsName.indexOf(e)].options?.name ?? undefined,
                   description: slashCommandsValues[slashCommandsName.indexOf(e)].options?.description ?? undefined,
                   required: slashCommandsValues[slashCommandsName.indexOf(e)].options?.required ?? true,
-                  type: this.isBetween(slashCommandsValues[slashCommandsName.indexOf(e)].options?.type, 1, 11)
+                  type: this._isBetween(slashCommandsValues[slashCommandsName.indexOf(e)].options?.type, 1, 11)
                     ? slashCommandsValues[slashCommandsName.indexOf(e)].options?.type
                     : 3,
                 },
@@ -61,14 +61,14 @@ export class ApplicationCommandSchema {
   }
 
   /**
-   * Check if a value is within a range of numbers
+   * Checks if a value is within a range of numbers.
    * @param {number} n The number to check
    * @param {number} min The min number
    * @param {number} max The max number
    * @returns {boolean}
    * @private
    */
-  private isBetween(n: number | any, min: number, max: number): boolean {
+  private _isBetween(n: number | any, min: number, max: number): boolean {
     return n >= min && n <= max;
   }
 }

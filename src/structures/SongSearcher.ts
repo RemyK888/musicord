@@ -1,6 +1,6 @@
 import { request } from 'undici';
 
-import { SearchedSong, SearchOptions, Song } from '../utils/Interfaces';
+import { SearchedSong, SearchOptions, Song, SongSearcherOptions } from '../utils/Interfaces';
 import {
   youTubePattern,
   youTubeBaseURL,
@@ -16,7 +16,18 @@ export class SongSearcher {
   private _limit = 10;
 
   /**
-   * Search a song
+   * Creates a new SongSearcher
+   * @param {SongSearcher} options
+   */
+  constructor(options?: SongSearcherOptions) {
+    if (options && typeof options.customInnertubeContext === 'object') {
+      this._innerTubeContext = options.customInnertubeContext;
+      Object.assign(this._innerTubeContext, { user: {}, request: {} });
+    }
+  }
+
+  /**
+   * Searchs a song
    * @param {string} args
    * @param {SearchOptions} options
    * @returns {Promise<SearchedSong[]>}
@@ -45,7 +56,7 @@ export class SongSearcher {
   }
 
   /**
-   *
+   * Extracts infos from a YouTube video
    * @param {string} url
    * @returns {Promise<Song>}
    */
@@ -75,7 +86,7 @@ export class SongSearcher {
   }
 
   /**
-   *
+   * Adds results for a searched video
    * @param {any[]} results
    * @param {SearchedSong[]} returnData
    * @private
@@ -110,6 +121,7 @@ export class SongSearcher {
   }
 
   /**
+   * Gets an InnerTube API key and set the Innertube context, depending on your computer
    * @returns {Promise<void>}
    * @private
    */
@@ -117,11 +129,12 @@ export class SongSearcher {
     const { body } = await request(`${youTubeBaseURL}?hl=en`);
     const jsonData = await JSON.parse((/ytcfg.set\(({.+?})\)/s.exec(await body.text()) as RegExpExecArray)[1]);
     this._apikey = jsonData.INNERTUBE_API_KEY;
-    this._innerTubeContext = jsonData.INNERTUBE_CONTEXT;
+    if (this._innerTubeContext === null || Object.keys(this._innerTubeContext).length === 0)
+      this._innerTubeContext = jsonData.INNERTUBE_CONTEXT;
   }
 
   /**
-   *
+   * Generates body to fetch YouTube API
    * @param {string} url
    * @returns {object}
    * @private
@@ -134,8 +147,8 @@ export class SongSearcher {
   }
 
   /**
-   *
-   * @param {number} s
+   * Humanizes seconds
+   * @param {number} secs
    * @returns {string}
    * @private
    */

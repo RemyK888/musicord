@@ -84,18 +84,21 @@ client.on('interactionCreate', async (interaction) => {
           const queue = musicordPlayer.getQueue(interaction.guild as Guild);
           if (queue) await queue.play(msgArgs as any, msgMember.voice.channel);
           const queueInfo = musicordPlayer.getQueueInfo(interaction.guild as Guild);
-          if (queueInfo) interaction.reply(`En train de jouer ${queueInfo.songs[0].title}`)
+          if (queueInfo) {
+            if (queue.isPlaying()) return interaction.reply(`En train de jouer ${queueInfo.songs[0].title}`)
+            else return interaction.reply(`${queueInfo.songs[0].title} a été ajouté à la playlist`)
+          }
         } else {
           const queue = musicordPlayer.initQueue(interaction.guild as Guild, {
             textChannel: interaction.channel as AnyChannel,
             voiceChannel: msgMember.voice.channel
           })
-          if (queue) { 
+          if (queue) {
             queue.setFilter(AudioFilters.rotatingAudio)
-            await queue.play(msgArgs as any, msgMember.voice.channel) 
+            await queue.play(msgArgs as any, msgMember.voice.channel)
           }
           const queueInfo = musicordPlayer.getQueueInfo(interaction.guild as Guild);
-          if (queueInfo) interaction.reply(`En train de jouer ${queueInfo.songs[0].title}`)
+          if (queueInfo) return interaction.reply(`En train de jouer ${queueInfo.songs[0].title}`)
         }
       }
     } else if (interaction.commandName === 'stop') {
@@ -106,18 +109,18 @@ client.on('interactionCreate', async (interaction) => {
         interaction.reply('La musique a bien été arrêtée')
       }
     } else if (interaction.commandName === 'setvolume') {
-      const msgArgs:any = interaction.options.get('volume')?.value
+      const msgArgs: any = interaction.options.get('volume')?.value
       if (!msgArgs) return interaction.reply('Pas d\'argument inséré');
       if (isNaN(msgArgs)) return interaction.reply('Le volume doit être un nombre compris entre 0 et 100')
       if (msgArgs < 0 || msgArgs > 100) return interaction.reply('Le volume doit être un nombre compris entre 0 et 100')
       if (musicordPlayer.existQueue(interaction.guild as Guild)) {
         const queue = musicordPlayer.getQueue(interaction.guild as Guild);
         // @ts-ignore
-        queue.setVolume(msgArgs/100)
+        queue.setVolume(msgArgs / 100)
         interaction.reply('Le volume a bien été changé')
       }
     }
-    else if(interaction.commandName === 'pause') {
+    else if (interaction.commandName === 'pause') {
       if (musicordPlayer.existQueue(interaction.guild as Guild)) {
         const queue = musicordPlayer.getQueue(interaction.guild as Guild);
         // @ts-ignore
@@ -125,7 +128,7 @@ client.on('interactionCreate', async (interaction) => {
         interaction.reply('La musique a bien été mise en pause')
       }
     }
-    else if(interaction.commandName === 'resume') {
+    else if (interaction.commandName === 'resume') {
       if (musicordPlayer.existQueue(interaction.guild as Guild)) {
         const queue = musicordPlayer.getQueue(interaction.guild as Guild);
         // @ts-ignore
