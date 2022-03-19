@@ -22,7 +22,12 @@ import {
   ExtendedAudioPlayerStatus,
   PlayerEvents,
   youTubePlaylistPattern,
+  ProgressBarOptions,
 } from '../utils/Constants';
+
+const sleep = (ms: number): Promise<unknown> => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
 
 export class Player extends EventEmitter {
   public guild: Guild;
@@ -230,8 +235,8 @@ export class Player extends EventEmitter {
       if (currentQueue.playing === true) {
         if (youTubePlaylistPattern.test(song as string)) {
           const playlist = await this._songSearcher.fetchPlaylist(song as string);
-          for (const i of playlist) {
-            await this.addSong(i.url);
+          for (const e of playlist) {
+            await this.addSong(e.url);
           }
           return;
         } else {
@@ -249,8 +254,8 @@ export class Player extends EventEmitter {
       }
       if (youTubePlaylistPattern.test(song as string)) {
         const playlist = await this._songSearcher.fetchPlaylist(song as string);
-        for await (const i of playlist) {
-          await this.addSong(i.url);
+        for (const e of playlist) {
+          await this.addSong(e.url);
         }
       } else {
         if (currentQueue.songs === [] || currentQueue.songs[0]?.url !== song)
@@ -268,6 +273,9 @@ export class Player extends EventEmitter {
       currentQueue.ressource.volume?.setVolumeLogarithmic(currentQueue.volume);
       currentQueue.connection?.subscribe(player);
       player.play(currentQueue.ressource);
+      setInterval(() => {
+        console.log(this.generateSongSlideBar());
+      }, 1000);
       currentQueue.playing = true;
       try {
         await entersState(player, AudioPlayerStatus.Playing, 5000);
@@ -275,6 +283,29 @@ export class Player extends EventEmitter {
         throw new Error(error as string);
       }
       this._handleVoiceState(player);
+    }
+  }
+
+  public generateSongSlideBar(): string | undefined {
+    const currentQueue = this._queue.get(this.guild.id);
+    if (currentQueue) {
+      return (
+        ProgressBarOptions.line
+          .repeat(
+            Math.round(
+              ProgressBarOptions.size *
+              ((currentQueue.ressource?.playbackDuration as number) / currentQueue.songs[0].msDuration),
+            ),
+          )
+          .replace(/.$/, ProgressBarOptions.slider) +
+        ProgressBarOptions.line.repeat(
+          ProgressBarOptions.size -
+          Math.round(
+            ProgressBarOptions.size *
+            ((currentQueue.ressource?.playbackDuration as number) / currentQueue.songs[0].msDuration),
+          ),
+        )
+      );
     }
   }
 
@@ -321,7 +352,7 @@ export class Player extends EventEmitter {
         }),
         opusEncoder,
       ],
-      () => {},
+      () => { },
     );
   }
 

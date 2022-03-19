@@ -8,6 +8,8 @@ export const youTubeVideoURL = 'https://www.youtube.com/watch?v=';
 export const youTubeChannelURL = 'https://www.youtube.com/channel';
 export const youTubePlaylistURL = 'https://www.youtube.com/playlist';
 
+export const lyricsApiUrl = 'https://some-random-api.ml/lyrics?title=';
+
 export const InnerTubeAndroidContext = {
   context: {
     client: {
@@ -23,6 +25,12 @@ export const InnerTubeAndroidContext = {
 };
 
 export const DefaultFFmpegArgs = ['-reconnect', '1', '-reconnect_streamed', '1', '-reconnect_delay_max', '5'];
+
+export const ProgressBarOptions = {
+  size: 20,
+  line: '▬',
+  slider: '🔘',
+};
 
 export enum ExtendedAudioPlayerStatus {
   Error = 'error',

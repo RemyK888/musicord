@@ -22,6 +22,7 @@ export interface ApplicationCommandSchemaOptions {
   stop?: CommandOptions;
   setvolume?: CommandOptions;
   resume?: CommandOptions;
+  ping?: CommandOptions;
 }
 
 type DJSSlashCommandsType = 'STRING' | 'BOOLEAN' | 'NUMBER' | 'CHANNEL';
@@ -139,4 +140,9 @@ export interface SearchedPlaylist {
   index: number;
   isPlayable: boolean;
   url: string;
+}
+
+export interface SongLyrics {
+  title: string;
+  lyrics: string;
 }

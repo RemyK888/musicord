@@ -36,6 +36,10 @@ const commandsSchema = new ApplicationCommandSchema({
   resume: {
     description: 'Reprendre la musique en cours',
     implemented: true
+  },
+  ping: {
+    description: 'CA VA MARCHER',
+    implemented: true
   }
 });
 
@@ -58,7 +62,8 @@ const rest = new REST({ version: '10' }).setToken('NzI2NTEwNjE3MDQ5MTcwMDAx.XveV
 
 
 
-import { AnyChannel, Client, Guild } from 'discord.js';
+import { AnyChannel, Client, Guild, TextInputStyle, ActionRow } from 'discord.js';
+import { ModalBuilder, TextInputBuilder, ActionRowBuilder, ButtonBuilder } from '@discordjs/builders'
 
 import { Musicord, AudioFilters } from '../src/index';
 
@@ -92,13 +97,14 @@ client.on('interactionCreate', async (interaction) => {
           const queue = musicordPlayer.initQueue(interaction.guild as Guild, {
             textChannel: interaction.channel as AnyChannel,
             voiceChannel: msgMember.voice.channel
-          })
+          });
           if (queue) {
+            interaction.deferReply();
             //queue.setFilter(AudioFilters.rotatingAudio)
             await queue.play(msgArgs as any, msgMember.voice.channel)
           }
           const queueInfo = musicordPlayer.getQueueInfo(interaction.guild as Guild);
-          if (queueInfo) return interaction.reply(`En train de jouer ${queueInfo.songs[0].title}`)
+          if (queueInfo) return await interaction.editReply(`En train de jouer ${queueInfo.songs[0].title}`)
         }
       }
     } else if (interaction.commandName === 'stop') {
@@ -135,6 +141,16 @@ client.on('interactionCreate', async (interaction) => {
         queue.resume()
         interaction.reply('La musique a bien été remise en route')
       }
+    }
+    else if (interaction.commandName === 'ping') {
+      const btn = new ActionRowBuilder()
+        .addComponents(
+          new ButtonBuilder()
+            .setCustomId('button-test')
+            .setLabel('CA MARCHE')
+            .setStyle(1),       
+        ) as any
+      interaction.reply({ content: 'coucou', components: [btn] })
     }
   } else return
 })
