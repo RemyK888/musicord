@@ -35,7 +35,7 @@ export class Musicord {
     else {
       const currentQueue = this.queue.get(guild.id);
       if (options.textChannel !== currentQueue?.textChannel || options.voiceChannel !== currentQueue.voiceChannel)
-        this.queue.set(guild.id, this._generateQueueSchema(guild, currentQueue as InitQueueOptions));
+        this.queue.set(guild.id, this._generateQueueSchema(guild, options));
     }
     return new Player(this.queue, guild, options);
   }
@@ -69,6 +69,12 @@ export class Musicord {
     return this.queue.get(guild.id);
   }
 
+  /**
+   * Generates what will be stored in the queue.
+   * @param {Guild} guild
+   * @param {InitQueueOptions} options
+   * @returns {QueueOptions}
+   */
   private _generateQueueSchema(guild: Guild, options: InitQueueOptions): QueueOptions {
     return {
       guild: guild,

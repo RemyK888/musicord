@@ -132,3 +132,11 @@ export interface QueueOptions {
 export interface PlayerEventsList {
   trackStart: string;
 }
+
+export interface SearchedPlaylist {
+  title: string;
+  videoId: string;
+  index: number;
+  isPlayable: boolean;
+  url: string;
+}

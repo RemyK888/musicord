@@ -16,7 +16,13 @@ import { pipeline } from 'stream';
 
 import { SongSearcher } from './SongSearcher';
 import { InitQueueOptions, QueueOptions, Range, Song } from '../utils/Interfaces';
-import { youTubePattern, audioPattern, ExtendedAudioPlayerStatus, PlayerEvents } from '../utils/Constants';
+import {
+  youTubePattern,
+  audioPattern,
+  ExtendedAudioPlayerStatus,
+  PlayerEvents,
+  youTubePlaylistPattern,
+} from '../utils/Constants';
 
 export class Player extends EventEmitter {
   public guild: Guild;
@@ -190,7 +196,7 @@ export class Player extends EventEmitter {
   public setVolume(volume: Range<0, 101>): void {
     const currentQueue = this._queue.get(this.guild.id);
     if (currentQueue) {
-      currentQueue.ressource?.volume?.setVolumeLogarithmic(volume * 2);
+      currentQueue.ressource?.volume?.setVolumeLogarithmic(volume);
       currentQueue.volume = volume;
     }
   }
@@ -221,7 +227,17 @@ export class Player extends EventEmitter {
     if (!song) throw new TypeError('');
     let currentQueue = this._queue.get(this.guild.id);
     if (currentQueue) {
-      if (currentQueue.playing === true) return await this.addSong(typeof song === 'string' ? song : song.url);
+      if (currentQueue.playing === true) {
+        if (youTubePlaylistPattern.test(song as string)) {
+          const playlist = await this._songSearcher.fetchPlaylist(song as string);
+          for (const i of playlist) {
+            await this.addSong(i.url);
+          }
+          return;
+        } else {
+          return await this.addSong(typeof song === 'string' ? song : song.url);
+        }
+      }
       if (!(currentQueue.connection instanceof VoiceConnection)) {
         if (channel || currentQueue.voiceChannel !== undefined) {
           currentQueue.connection = joinVoiceChannel({
@@ -231,8 +247,15 @@ export class Player extends EventEmitter {
           });
         } else return;
       }
-      if (currentQueue.songs === [] || currentQueue.songs[0]?.url !== song)
-        await this.addSong(typeof song === 'string' ? song : song.url);
+      if (youTubePlaylistPattern.test(song as string)) {
+        const playlist = await this._songSearcher.fetchPlaylist(song as string);
+        for await (const i of playlist) {
+          await this.addSong(i.url);
+        }
+      } else {
+        if (currentQueue.songs === [] || currentQueue.songs[0]?.url !== song)
+          await this.addSong(typeof song === 'string' ? song : song.url);
+      }
       const player = createAudioPlayer({
         behaviors: {
           noSubscriber: ('pause' || 'play') as NoSubscriberBehavior,
@@ -242,10 +265,9 @@ export class Player extends EventEmitter {
         inputType: 'opus' as StreamType,
         inlineVolume: true,
       });
-      currentQueue.ressource.volume?.setVolumeLogarithmic(currentQueue.volume * 2);
+      currentQueue.ressource.volume?.setVolumeLogarithmic(currentQueue.volume);
       currentQueue.connection?.subscribe(player);
       player.play(currentQueue.ressource);
-      console.log(currentQueue.ressource?.encoder);
       currentQueue.playing = true;
       try {
         await entersState(player, AudioPlayerStatus.Playing, 5000);

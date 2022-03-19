@@ -84,7 +84,7 @@ client.on('interactionCreate', async (interaction) => {
           const queue = musicordPlayer.getQueue(interaction.guild as Guild);
           if (queue) await queue.play(msgArgs as any, msgMember.voice.channel);
           const queueInfo = musicordPlayer.getQueueInfo(interaction.guild as Guild);
-          if (queueInfo) {
+          if (queueInfo && queue) {
             if (queue.isPlaying()) return interaction.reply(`En train de jouer ${queueInfo.songs[0].title}`)
             else return interaction.reply(`${queueInfo.songs[0].title} a été ajouté à la playlist`)
           }
@@ -94,7 +94,7 @@ client.on('interactionCreate', async (interaction) => {
             voiceChannel: msgMember.voice.channel
           })
           if (queue) {
-            queue.setFilter(AudioFilters.rotatingAudio)
+            //queue.setFilter(AudioFilters.rotatingAudio)
             await queue.play(msgArgs as any, msgMember.voice.channel)
           }
           const queueInfo = musicordPlayer.getQueueInfo(interaction.guild as Guild);

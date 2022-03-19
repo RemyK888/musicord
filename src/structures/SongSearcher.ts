@@ -1,6 +1,6 @@
 import { request } from 'undici';
 
-import { SearchedSong, SearchOptions, Song, SongSearcherOptions } from '../utils/Interfaces';
+import { SearchedPlaylist, SearchedSong, SearchOptions, Song, SongSearcherOptions } from '../utils/Interfaces';
 import {
   youTubePattern,
   youTubeBaseURL,
@@ -8,6 +8,7 @@ import {
   youTubeVideoURL,
   youTubeChannelURL,
   InnerTubeAndroidContext,
+  youTubePlaylistPattern,
 } from '../utils/Constants';
 
 export class SongSearcher {
@@ -65,7 +66,7 @@ export class SongSearcher {
     if (this._apikey === undefined) await this._initInnerTubeApiKey();
     const { body } = await request(`${innerTubeApiURL}/player?key=${this._apikey}`, {
       method: 'POST',
-      body: JSON.stringify(this._generateExtractBody(url)),
+      body: JSON.stringify(this._generateExtractBody(url, 'video')),
     });
     const jsonData = await body.json();
     return {
@@ -83,6 +84,44 @@ export class SongSearcher {
       },
       streamURL: jsonData.streamingData.formats.slice(-1)[0].url,
     };
+  }
+
+  /**
+   * name
+   */
+  public async fetchPlaylist(url: string): Promise<SearchedPlaylist[]> {
+    if (!url || typeof url !== 'string' || !youTubePlaylistPattern.test(url)) throw new TypeError('');
+    if (this._apikey === undefined) await this._initInnerTubeApiKey();
+    const playlistId = url.match(/[?&]list=([^#\&\?]+)/)![1];
+    const isMix: boolean = playlistId.startsWith('RD');
+    let returnData: SearchedPlaylist[] = [];
+    if (isMix === false) {
+      const { body } = await request(`${innerTubeApiURL}/browse?key=${this._apikey}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          context: this._innerTubeContext,
+          browseId: `VL${playlistId}`,
+        }),
+      });
+      let maxResults = 10;
+      const jsonData = await body.json();
+      const playlistTracks =
+        jsonData.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0]
+          .itemSectionRenderer.contents[0].playlistVideoListRenderer.contents;
+      for (const e of playlistTracks) {
+        maxResults--;
+        if (maxResults === 0) break;
+        const i = e.playlistVideoRenderer;
+        returnData.push({
+          title: i.title.runs[0].text,
+          videoId: i.videoId,
+          url: `${youTubeVideoURL}${i.videoId}`,
+          isPlayable: i.isPlayable,
+          index: Number(i.index.simpleText),
+        });
+      }
+    }
+    return returnData;
   }
 
   /**
@@ -129,7 +168,7 @@ export class SongSearcher {
     const { body } = await request(`${youTubeBaseURL}?hl=en`);
     const jsonData = await JSON.parse((/ytcfg.set\(({.+?})\)/s.exec(await body.text()) as RegExpExecArray)[1]);
     this._apikey = jsonData.INNERTUBE_API_KEY;
-    if (this._innerTubeContext === null || Object.keys(this._innerTubeContext).length === 0)
+    if (this._innerTubeContext === null || Object.keys(this._innerTubeContext ?? []).length === 0)
       this._innerTubeContext = jsonData.INNERTUBE_CONTEXT;
   }
 
@@ -139,11 +178,16 @@ export class SongSearcher {
    * @returns {object}
    * @private
    */
-  private _generateExtractBody(url: string): object {
-    const videoId = url.match(
-      /(?:https?:\/\/)?(?:www\.|m\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\/?\?v=|\/embed\/|\/)([^\s&\?\/\#]+)/,
-    )![1];
-    return Object.assign(InnerTubeAndroidContext, { videoId });
+  private _generateExtractBody(url: string, type: 'video' | 'playlist'): object {
+    let returnData = undefined;
+    switch (type) {
+      case 'video':
+        const videoId = url.match(
+          /(?:https?:\/\/)?(?:www\.|m\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\/?\?v=|\/embed\/|\/)([^\s&\?\/\#]+)/,
+        )![1];
+        returnData = Object.assign(InnerTubeAndroidContext, { videoId });
+    }
+    return returnData as object;
   }
 
   /**

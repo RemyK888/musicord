@@ -82,3 +82,9 @@ import { audioPattern } from '../src/utils/Constants';
 console.log(audioPattern.test('http://ccmixter.org/content/Lav/Lav_-_dark_quiet_night_(war_in_europe_2022_edition).mp3'))
 
 */
+
+
+import { SongSearcher } from '../src/index';
+const songSearcher = new SongSearcher();
+
+songSearcher.fetchPlaylist('https://www.youtube.com/watch?v=JuWUTsIBx5Q&list=PLUarU1HDBmlyQe9X4oxhpgY17xhURd1bl')
