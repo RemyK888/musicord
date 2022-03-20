@@ -1,6 +1,7 @@
 import { request } from 'undici';
 
 import {
+  Playlist,
   SearchedPlaylist,
   SearchedSong,
   SearchOptions,
@@ -94,6 +95,12 @@ export class SongSearcher {
     };
   }
 
+  /**
+   * Searchs a playlist and returns the 100 first songs of it.
+   * This method also works for YouTube mixes.
+   * @param {string} url The YouTube playlist url.
+   * @returns {Promise<SearchedPlaylist[]>}
+   */
   public async fetchPlaylist(url: string): Promise<SearchedPlaylist[]> {
     if (!url || typeof url !== 'string' || !youTubePlaylistPattern.test(url)) throw new TypeError('');
     if (this._apikey === undefined) await this._initInnerTubeApiKey();
@@ -101,7 +108,7 @@ export class SongSearcher {
     const isMix: boolean = playlistId.startsWith('RD');
     let returnData: SearchedPlaylist[] = [];
     let maxResults = 100;
-    if (isMix === false) {
+    if (!isMix) {
       const { body } = await request(`${innerTubeApiURL}/browse?key=${this._apikey}`, {
         method: 'POST',
         body: JSON.stringify({
@@ -154,6 +161,43 @@ export class SongSearcher {
   }
 
   /**
+   * Extracts playlist title and description.
+   * Works for YouTube mixes too.
+   * The returned description will be empty if the inserted link is a mix.
+   * @param {string} url The YouTube playlist url.
+   * @returns
+   */
+  public async extractPlaylistInfo(url: string): Promise<Playlist> {
+    if (!url || typeof url !== 'string' || !youTubePlaylistPattern.test(url)) throw new TypeError('');
+    if (this._apikey === undefined) await this._initInnerTubeApiKey();
+    const playlistId = url.match(/[?&]list=([^#\&\?]+)/)![1];
+    const isMix: boolean = playlistId.startsWith('RD');
+    if (!isMix) {
+      const { body } = await request(`${innerTubeApiURL}/browse?key=${this._apikey}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          context: this._innerTubeContext,
+          browseId: `VL${playlistId}`,
+        }),
+      });
+      const jsonData = await body.json();
+      const playlistMeta = jsonData.metadata.playlistMetadataRenderer;
+      return { title: playlistMeta.title, description: playlistMeta.description };
+    } else {
+      const { body } = await request(`${innerTubeApiURL}/next?key=${this._apikey}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          context: this._innerTubeContext,
+          playlistId,
+        }),
+      });
+      const jsonData = await body.json();
+      const mixMeta = jsonData.contents.twoColumnWatchNextResults.playlist;
+      return { title: mixMeta.playlist.title, description: String() };
+    }
+  }
+
+  /**
    * Gets a song lyrics
    * @param {string} query Song title
    * @returns {Promise<SongLyrics|undefined>}
@@ -171,7 +215,7 @@ export class SongSearcher {
 
   /**
    * Adds results for a searched video
-   * @param {any[]} results
+   * @param{any[]} results
    * @param {SearchedSong[]} returnData
    * @private
    */

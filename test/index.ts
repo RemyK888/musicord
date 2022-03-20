@@ -40,6 +40,16 @@ const commandsSchema = new ApplicationCommandSchema({
   ping: {
     description: 'CA VA MARCHER',
     implemented: true
+  },
+  getplaylist: {
+    description: 'Recuperer les infos d\'une playlist ou d\'un mix',
+    implemented: true,
+    options: {
+      name: 'lien',
+      description: 'Lien de la playlist/mix',
+      required: true,
+      type: 3
+    }
   }
 });
 
@@ -62,10 +72,10 @@ const rest = new REST({ version: '10' }).setToken('NzI2NTEwNjE3MDQ5MTcwMDAx.XveV
 
 
 
-import { AnyChannel, Client, Guild, TextInputStyle, ActionRow } from 'discord.js';
+import { AnyChannel, Client, Guild, TextInputStyle, ActionRow, EmbedBuilder } from 'discord.js';
 import { ModalBuilder, TextInputBuilder, ActionRowBuilder, ButtonBuilder } from '@discordjs/builders'
 
-import { Musicord, AudioFilters } from '../src/index';
+import { Musicord, AudioFilters, SongSearcher } from '../src/index';
 
 const client = new Client({
   intents: 32767
@@ -74,6 +84,7 @@ const client = new Client({
 const musicordPlayer = new Musicord(client, {
   ytApiKey: 'dfgdfg'
 });
+const searcher = new SongSearcher();
 
 // @ts-ignore
 client.on('interactionCreate', async (interaction) => {
@@ -151,6 +162,13 @@ client.on('interactionCreate', async (interaction) => {
             .setStyle(1),       
         ) as any
       interaction.reply({ content: 'coucou', components: [btn] })
+    }
+    else if (interaction.commandName === 'getplaylist') {
+      const msgArgs = interaction.options.get('lien')?.value
+      if (!msgArgs) return interaction.reply('Pas d\'argument inséré');
+      const data = await searcher.extractPlaylistInfo(msgArgs as string)
+      
+      interaction.reply(data.title + ' | ' + data.description)
     }
   } else return
 })

@@ -117,16 +117,20 @@ export class Player extends EventEmitter {
   }
 
   /**
-   * Adds one or more filters to the queue.
-   * @param {string|string[]} filter
+   * Adds a filter to the queue.
+   * @param {string} filter
    */
-  public setFilter(filter: string | string[]): void {
-    if (!filter || (typeof filter !== 'string' && filter instanceof Array === false)) throw new TypeError('');
+  public setFilter(filter: string, applied?: boolean): void {
+    if (!filter || typeof filter !== 'string') throw new TypeError('');
     const currentQueue = this._queue.get(this.guild.id);
     if (currentQueue) {
-      if (!currentQueue.filters) this.resetFilters();
-      if (Array.isArray(filter)) currentQueue.filters.push(...filter);
-      else currentQueue.filters.push(filter);
+      if (applied === false) {
+        if (filter in currentQueue.filters && currentQueue.filters.length > 0)
+          currentQueue.filters.slice(currentQueue.filters.indexOf(filter), 1);
+      } else {
+        if (!currentQueue.filters || currentQueue.filters.length > 0) this.resetFilters();
+        currentQueue.filters.push(filter);
+      }
     }
   }
 
@@ -138,6 +142,15 @@ export class Player extends EventEmitter {
     const currentQueue = this._queue.get(this.guild.id);
     if (currentQueue) currentQueue.filters = [];
     else return;
+  }
+
+  /**
+   * Gets all the queue songs
+   * @returns {Song[]|undefined}
+   */
+  public getSongs(): Song[] | undefined {
+    const currentQueue = this._queue.get(this.guild.id);
+    if (currentQueue) return currentQueue.songs;
   }
 
   /**
@@ -261,6 +274,7 @@ export class Player extends EventEmitter {
         if (currentQueue.songs === [] || currentQueue.songs[0]?.url !== song)
           await this.addSong(typeof song === 'string' ? song : song.url);
       }
+      if (currentQueue.songs.length === 0) return;
       const player = createAudioPlayer({
         behaviors: {
           noSubscriber: ('pause' || 'play') as NoSubscriberBehavior,
@@ -273,9 +287,6 @@ export class Player extends EventEmitter {
       currentQueue.ressource.volume?.setVolumeLogarithmic(currentQueue.volume);
       currentQueue.connection?.subscribe(player);
       player.play(currentQueue.ressource);
-      setInterval(() => {
-        console.log(this.generateSongSlideBar());
-      }, 1000);
       currentQueue.playing = true;
       try {
         await entersState(player, AudioPlayerStatus.Playing, 5000);
