@@ -286,6 +286,10 @@ export class Player extends EventEmitter {
     }
   }
 
+  /**
+   * Generates the current song progress bar.
+   * @returns {string|undefined}
+   */
   public generateSongSlideBar(): string | undefined {
     const currentQueue = this._queue.get(this.guild.id);
     if (currentQueue) {
@@ -294,16 +298,16 @@ export class Player extends EventEmitter {
           .repeat(
             Math.round(
               ProgressBarOptions.size *
-              ((currentQueue.ressource?.playbackDuration as number) / currentQueue.songs[0].msDuration),
+                ((currentQueue.ressource?.playbackDuration as number) / currentQueue.songs[0].msDuration),
             ),
           )
           .replace(/.$/, ProgressBarOptions.slider) +
         ProgressBarOptions.line.repeat(
           ProgressBarOptions.size -
-          Math.round(
-            ProgressBarOptions.size *
-            ((currentQueue.ressource?.playbackDuration as number) / currentQueue.songs[0].msDuration),
-          ),
+            Math.round(
+              ProgressBarOptions.size *
+                ((currentQueue.ressource?.playbackDuration as number) / currentQueue.songs[0].msDuration),
+            ),
         )
       );
     }
@@ -352,7 +356,7 @@ export class Player extends EventEmitter {
         }),
         opusEncoder,
       ],
-      () => { },
+      () => {},
     );
   }
 

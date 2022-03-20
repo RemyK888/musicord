@@ -3,6 +3,7 @@ import { FFmpegCustomEqualizerOptions } from '../utils/Interfaces';
 export class FFmpegAudioFilters {
   /**
    * 8D audio
+   * @type {string}
    */
   get rotatingAudio(): string {
     return 'apulsator=hz=0.09';
@@ -10,6 +11,7 @@ export class FFmpegAudioFilters {
 
   /**
    * Mono
+   * @type {string}
    */
   get mono(): string {
     return 'pan=1c|c0=0.9*c0+0.1*c1';
@@ -17,6 +19,7 @@ export class FFmpegAudioFilters {
 
   /**
    * Augmented stereo
+   * @type {string}
    */
   get extraStereo(): string {
     return 'extrastereo';
@@ -24,6 +27,7 @@ export class FFmpegAudioFilters {
 
   /**
    * Vibrato
+   * @type {string}
    */
   get vibrato(): string {
     return 'vibrato';
@@ -31,6 +35,7 @@ export class FFmpegAudioFilters {
 
   /**
    * Play the sound in reverse
+   * @type {string}
    */
   get reverse(): string {
     return 'areverse';
@@ -38,6 +43,7 @@ export class FFmpegAudioFilters {
 
   /**
    * Flanger
+   * @type {string}
    */
   get flanger(): string {
     return 'flanger';
@@ -45,6 +51,7 @@ export class FFmpegAudioFilters {
 
   /**
    * 3D audio
+   * @type {string}
    */
   get chorus(): string {
     return 'chorus=0.5:0.9:50|60|40:0.4|0.32|0.3:0.25|0.4|0.3:2|2.3|1.3';

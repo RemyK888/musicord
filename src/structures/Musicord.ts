@@ -1,5 +1,6 @@
 import { Guild, Client } from 'discord.js';
 
+import { version } from '../../package.json';
 import { InitQueueOptions, MusicordOptions, QueueOptions } from '../utils/Interfaces';
 import { Player } from './Player';
 
@@ -19,6 +20,14 @@ export class Musicord {
       this.options = options;
     this.client = client;
     console.log(this.options);
+  }
+
+  /**
+   * Musicord version
+   * @type {string}
+   */
+  get version(): string {
+    return version;
   }
 
   /**
