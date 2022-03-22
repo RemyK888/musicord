@@ -1,25 +1,19 @@
-import { Guild, Client } from 'discord.js';
+import { Guild } from 'discord.js';
 
 import { version } from '../../package.json';
 import { InitQueueOptions, MusicordOptions, QueueOptions } from '../utils/Interfaces';
 import { Player } from './Player';
 
 export class Musicord {
-  public readonly client: Client;
   public readonly options: MusicordOptions | {} = {};
   public readonly queue: Map<string, QueueOptions> = new Map();
 
   /**
    * Create a new Musicord
-   * @param {Client} client [Discord.Js client ](https://discord.js.org/#/docs/discord.js/stable/class/Client)
    * @param {MusicordOptions} options Musicord options
    */
-  constructor(client: Client, options?: MusicordOptions) {
-    if (!client || client instanceof Client === false) throw new TypeError('');
-    if (options && ('ytApiKey' in options || (<MusicordOptions>(<unknown>options)).ytApiKey !== undefined))
-      this.options = options;
-    this.client = client;
-    console.log(this.options);
+  constructor(options?: MusicordOptions) {
+    Object.assign(this.options, options);
   }
 
   /**
@@ -47,6 +41,15 @@ export class Musicord {
         this.queue.set(guild.id, this._generateQueueSchema(guild, options));
     }
     return new Player(this.queue, guild, options);
+  }
+
+  /**
+   * Deletes the queue for this guild
+   * @param {Guild} guild The queue guild
+   * @returns {void}
+   */
+  public deleteQueue(guild: Guild): void {
+    if (this.existQueue(guild)) this.queue.delete(guild.id);
   }
 
   /**

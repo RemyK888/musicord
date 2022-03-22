@@ -44,4 +44,6 @@ export enum PlayerEvents {
   Error = 'error',
   Debug = 'debug',
   TrackStart = 'trackStart',
+  TrackFinished = 'trackFinished',
+  Disconnected = 'disconnected',
 }

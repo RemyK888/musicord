@@ -1,5 +1,5 @@
 import { AudioResource, VoiceConnection } from '@discordjs/voice';
-import { Channel, VoiceChannel, ThreadChannel, AnyChannel, Guild, VoiceBasedChannel, StageChannel } from 'discord.js';
+import { VoiceChannel, Guild, VoiceBasedChannel, StageChannel, TextChannel, GuildTextBasedChannel } from 'discord.js';
 
 export interface MusicordOptions {
   ytApiKey: string;
@@ -44,13 +44,16 @@ type Enumerate<N extends number, Acc extends number[] = []> = Acc['length'] exte
   : Enumerate<N, [...Acc, Acc['length']]>;
 export type Range<F extends number, T extends number> = Exclude<Enumerate<T>, Enumerate<F>>;
 
+export interface AdvancedQueueOptions {
+  autoJoin?: boolean;
+  volume?: Range<0, 101>;
+  autoNextSong?: boolean;
+}
+
 export interface InitQueueOptions {
-  textChannel: Channel | ThreadChannel | AnyChannel;
+  textChannel: TextChannel | GuildTextBasedChannel;
   voiceChannel?: VoiceBasedChannel | VoiceChannel | StageChannel;
-  advancedOptions?: {
-    autoJoin?: boolean;
-    volume?: Range<0, 101>;
-  };
+  advancedOptions?: AdvancedQueueOptions;
 }
 
 export interface FFmpegCustomEqualizerOptions {
@@ -121,7 +124,7 @@ export interface SearchOptions {
 
 export interface QueueOptions {
   guild?: Guild;
-  textChannel?: Channel | ThreadChannel | AnyChannel;
+  textChannel?: TextChannel | GuildTextBasedChannel;
   voiceChannel?: VoiceBasedChannel | VoiceChannel | StageChannel;
   connection?: VoiceConnection | null;
   songs: Song[];
@@ -151,4 +154,10 @@ export interface SongLyrics {
 export interface Playlist {
   title: string;
   description: string;
+}
+
+export interface ClientVoiceSettingsOptions {
+  deaf: boolean;
+  requestToSpeak: boolean;
+  suppressed: boolean;
 }

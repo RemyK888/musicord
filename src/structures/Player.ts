@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { Guild, StageChannel, VoiceChannel } from 'discord.js';
+import { Guild, GuildTextBasedChannel, StageChannel, TextChannel, VoiceChannel } from 'discord.js';
 import {
   VoiceConnection,
   joinVoiceChannel,
@@ -12,10 +12,16 @@ import {
   entersState,
 } from '@discordjs/voice';
 import prism from 'prism-media';
-import { pipeline } from 'stream';
 
 import { SongSearcher } from './SongSearcher';
-import { InitQueueOptions, QueueOptions, Range, Song } from '../utils/Interfaces';
+import {
+  InitQueueOptions,
+  QueueOptions,
+  Range,
+  Song,
+  AdvancedQueueOptions,
+  ClientVoiceSettingsOptions,
+} from '../utils/Interfaces';
 import {
   youTubePattern,
   audioPattern,
@@ -29,8 +35,68 @@ const sleep = (ms: number): Promise<unknown> => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
+const ClientVoiceSettings = {
+  deaf: true,
+  requestToSpeak: false,
+  suppressed: false,
+
+  /**
+   * Sets if the client is deaf
+   * @param {boolean} state
+   * @returns {void}
+   */
+  setDeaf(state: boolean): void {
+    this.deaf = state ?? false;
+  },
+
+  /**
+   * Generates a speak request if needed
+   * @param {boolean} state
+   * @returns {void}
+   */
+  speakRequest(state: boolean): void {
+    this.requestToSpeak = state ?? false;
+  },
+
+  /**
+   * Sets the suppressed option
+   * @param {boolean} state
+   * @returns {void}
+   */
+  setSuppressed(state: boolean): void {
+    this.suppressed = state ?? false;
+  },
+
+  /**
+   * Extracts client voice settings values
+   * @returns {object}
+   */
+  extract(): ClientVoiceSettingsOptions {
+    return {
+      deaf: this.deaf,
+      requestToSpeak: this.requestToSpeak,
+      suppressed: this.suppressed,
+    };
+  },
+};
+
+export declare interface Player extends EventEmitter {
+  /**
+   * Emitted when a track starts
+   * @param {TextChannel|GuildTextBasedChannel} listener
+   * @param {Song} listener
+   * @event Player#trackStart
+   */
+  on(
+    event: 'trackStart',
+    listener: (channel: TextChannel | GuildTextBasedChannel, song: Song) => void | Promise<void> | any,
+  ): this;
+}
+
 export class Player extends EventEmitter {
-  public guild: Guild;
+  public clientVoiceSettings: typeof ClientVoiceSettings = ClientVoiceSettings;
+  public readonly guild: Guild;
+  public readonly options: AdvancedQueueOptions | any;
   private _queue: Map<string, QueueOptions>;
   private _songSearcher: SongSearcher = new SongSearcher();
 
@@ -40,7 +106,9 @@ export class Player extends EventEmitter {
    * @param {Guild} guild current guild
    */
   constructor(queue: Map<string, QueueOptions>, guild: Guild, options?: InitQueueOptions) {
-    super();
+    super({
+      captureRejections: true,
+    });
     if (!queue || queue.constructor !== Map) throw new Error('');
     if (!guild || guild instanceof Guild == false) throw new Error('');
     this._queue = queue;
@@ -51,6 +119,7 @@ export class Player extends EventEmitter {
      */
     this.guild = guild;
 
+    Object.assign(this.options, options?.advancedOptions);
     const currentQueue = this._queue.get(guild.id);
     if (options && options.advancedOptions?.autoJoin === true && currentQueue?.voiceChannel !== null) {
       try {
@@ -280,6 +349,7 @@ export class Player extends EventEmitter {
           noSubscriber: ('pause' || 'play') as NoSubscriberBehavior,
         },
       });
+      this._setClientVoiceSettings();
       currentQueue.ressource = createAudioResource(this._createWritableStream(currentQueue.songs[0].streamURL) as any, {
         inputType: 'opus' as StreamType,
         inlineVolume: true,
@@ -293,8 +363,9 @@ export class Player extends EventEmitter {
       } catch (error) {
         throw new Error(error as string);
       }
+      this.emit(PlayerEvents.TrackStart, currentQueue.textChannel, currentQueue.songs[0]);
       this._handleVoiceState(player);
-    }
+    } else return;
   }
 
   /**
@@ -325,9 +396,22 @@ export class Player extends EventEmitter {
   }
 
   /**
+   * Sets the client voice settings for the current guild
+   * @returns {void}
+   * @private
+   */
+  private _setClientVoiceSettings(): void {
+    const extractedSettings = this.clientVoiceSettings.extract();
+    this.guild.me?.voice.setDeaf(extractedSettings.deaf);
+    this.guild.me?.voice.setRequestToSpeak(extractedSettings.requestToSpeak);
+    this.guild.me?.voice.setSuppressed(extractedSettings.suppressed);
+  }
+
+  /**
    * Awaits player events and handles them.
    * @param {AudioPlayer} player
    * @returns {Promise<void>}
+   * @private
    */
   private async _handleVoiceState(player: AudioPlayer): Promise<void> {
     player.on(AudioPlayerStatus.Idle, (oldState, newState) => {
@@ -335,12 +419,19 @@ export class Player extends EventEmitter {
       if (oldState.status === AudioPlayerStatus.Playing && newState.status === AudioPlayerStatus.Idle) {
         if (currentQueue) {
           currentQueue.playing = false;
+          const lastSong = currentQueue.songs[0];
           currentQueue.songs.shift();
           if (Object.keys(currentQueue.songs).length === 0) {
             currentQueue.connection?.destroy();
             currentQueue.connection = undefined;
             currentQueue.ressource = undefined;
-          } else return this.play(currentQueue.songs[0].url as string);
+            this.emit(PlayerEvents.Disconnected, this.guild, currentQueue.textChannel);
+          } else {
+            this.emit(PlayerEvents.TrackFinished, currentQueue.textChannel, lastSong);
+            if (this.options && typeof this.options.autoNextSong === 'boolean' && this.options.autoNextSong === false)
+              return;
+            else return this.play(currentQueue.songs[0].url as string);
+          }
         }
       }
     });
@@ -356,25 +447,22 @@ export class Player extends EventEmitter {
    * Creates a writable stream.
    * @param {string} url
    * @returns {NodeJS.WritableStream}
+   * @private
    */
   private _createWritableStream(url: string): NodeJS.WritableStream {
+    const FFmpegTranscoder = new prism.FFmpeg({
+      args: this._generateFFmpegArgsSchema(url),
+      shell: false,
+    });
     const opusEncoder = new prism.opus.Encoder({ rate: 48000, channels: 2, frameSize: 960 });
-    return pipeline(
-      [
-        new prism.FFmpeg({
-          args: this._generateFFmpegArgsSchema(url),
-          shell: false,
-        }),
-        opusEncoder,
-      ],
-      () => {},
-    );
+    return FFmpegTranscoder.pipe(opusEncoder);
   }
 
   /**
    * Generates FFmpeg args.
    * @param {string} url
    * @returns {string[]}
+   * @private
    */
   private _generateFFmpegArgsSchema(url: string): string[] {
     const FFmpegArgs = ['-reconnect', '1', '-reconnect_streamed', '1', '-reconnect_delay_max', '5'];

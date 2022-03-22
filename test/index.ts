@@ -81,9 +81,7 @@ const client = new Client({
   intents: 32767
 })
 
-const musicordPlayer = new Musicord(client, {
-  ytApiKey: 'dfgdfg'
-});
+const musicordPlayer = new Musicord();
 const searcher = new SongSearcher();
 
 // @ts-ignore
@@ -106,7 +104,7 @@ client.on('interactionCreate', async (interaction) => {
           }
         } else {
           const queue = musicordPlayer.initQueue(interaction.guild as Guild, {
-            textChannel: interaction.channel as AnyChannel,
+            textChannel: interaction.channel ,
             voiceChannel: msgMember.voice.channel
           });
           if (queue) {
