@@ -61,3 +61,8 @@ export enum PrismOpusEncoderEvents {
   Readable = 'readable',
   Resume = 'resume',
 }
+
+export const spotifyPattern: RegExp = /(https?:\/\/open.spotify.com\/(track|user|artist|album)\/[a-zA-Z0-9]+(\/playlist\/[a-zA-Z0-9]+|)|spotify:(track|user|artist|album):[a-zA-Z0-9]+(:playlist:[a-zA-Z0-9]+|))/;
+export const spotifyTrackPattern: RegExp = /((http:\/\/(open\.spotify\.com\/.*|spoti\.fi\/.*|play\.spotify\.com\/.*))|(https:\/\/(open\.spotify\.com\/.*|play\.spotify\.com\/.*)))/i;
+
+export const spotifyApiURL = 'https://api.spotify.com/v1/'

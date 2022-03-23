@@ -18,10 +18,12 @@ import {
   InnerTubeAndroidContext,
   youTubePlaylistPattern,
   lyricsApiUrl,
+  spotifyApiURL,
 } from '../utils/Constants';
 
 export class SongSearcher {
-  private _apikey!: string;
+  private _apiKey!: string;
+  private _spotifyApiKey!: string;
   private _innerTubeContext!: object;
   private _limit = 10;
 
@@ -34,6 +36,7 @@ export class SongSearcher {
       this._innerTubeContext = options.customInnertubeContext;
       Object.assign(this._innerTubeContext, { user: {}, request: {} });
     }
+    if (options && typeof options.spotifyApiKey === 'string') this._spotifyApiKey = options.spotifyApiKey;
   }
 
   /**
@@ -44,9 +47,9 @@ export class SongSearcher {
    */
   public async search(args: string, options?: SearchOptions): Promise<SearchedSong[]> {
     if (!args || typeof args !== 'string' || youTubePattern.test(args)) throw new TypeError('');
-    if (this._apikey === undefined) await this._initInnerTubeApiKey();
+    if (this._apiKey === undefined) await this._initInnerTubeApiKey();
     this._limit = options?.maxResults ?? 10;
-    const { body } = await request(`${innerTubeApiURL}/search?key=${this._apikey}`, {
+    const { body } = await request(`${innerTubeApiURL}/search?key=${this._apiKey}`, {
       method: 'POST',
       body: JSON.stringify({
         context: this._innerTubeContext,
@@ -72,8 +75,8 @@ export class SongSearcher {
    */
   public async extractVideoInfo(url: string): Promise<Song> {
     if (!url || typeof url !== 'string' || !youTubePattern.test(url)) throw new TypeError('');
-    if (this._apikey === undefined) await this._initInnerTubeApiKey();
-    const { body } = await request(`${innerTubeApiURL}/player?key=${this._apikey}`, {
+    if (this._apiKey === undefined) await this._initInnerTubeApiKey();
+    const { body } = await request(`${innerTubeApiURL}/player?key=${this._apiKey}`, {
       method: 'POST',
       body: JSON.stringify(this._generateExtractBody(url)),
     });
@@ -103,13 +106,13 @@ export class SongSearcher {
    */
   public async fetchPlaylist(url: string): Promise<SearchedPlaylist[]> {
     if (!url || typeof url !== 'string' || !youTubePlaylistPattern.test(url)) throw new TypeError('');
-    if (this._apikey === undefined) await this._initInnerTubeApiKey();
+    if (this._apiKey === undefined) await this._initInnerTubeApiKey();
     const playlistId = url.match(/[?&]list=([^#\&\?]+)/)![1];
     const isMix: boolean = playlistId.startsWith('RD');
     let returnData: SearchedPlaylist[] = [];
     let maxResults = 100;
     if (!isMix) {
-      const { body } = await request(`${innerTubeApiURL}/browse?key=${this._apikey}`, {
+      const { body } = await request(`${innerTubeApiURL}/browse?key=${this._apiKey}`, {
         method: 'POST',
         body: JSON.stringify({
           context: this._innerTubeContext,
@@ -133,7 +136,7 @@ export class SongSearcher {
         });
       }
     } else {
-      const { body } = await request(`${innerTubeApiURL}/next?key=${this._apikey}`, {
+      const { body } = await request(`${innerTubeApiURL}/next?key=${this._apiKey}`, {
         method: 'POST',
         body: JSON.stringify({
           context: this._innerTubeContext,
@@ -169,11 +172,11 @@ export class SongSearcher {
    */
   public async extractPlaylistInfo(url: string): Promise<Playlist> {
     if (!url || typeof url !== 'string' || !youTubePlaylistPattern.test(url)) throw new TypeError('');
-    if (this._apikey === undefined) await this._initInnerTubeApiKey();
+    if (this._apiKey === undefined) await this._initInnerTubeApiKey();
     const playlistId = url.match(/[?&]list=([^#\&\?]+)/)![1];
     const isMix: boolean = playlistId.startsWith('RD');
     if (!isMix) {
-      const { body } = await request(`${innerTubeApiURL}/browse?key=${this._apikey}`, {
+      const { body } = await request(`${innerTubeApiURL}/browse?key=${this._apiKey}`, {
         method: 'POST',
         body: JSON.stringify({
           context: this._innerTubeContext,
@@ -184,7 +187,7 @@ export class SongSearcher {
       const playlistMeta = jsonData.metadata.playlistMetadataRenderer;
       return { title: playlistMeta.title, description: playlistMeta.description };
     } else {
-      const { body } = await request(`${innerTubeApiURL}/next?key=${this._apikey}`, {
+      const { body } = await request(`${innerTubeApiURL}/next?key=${this._apiKey}`, {
         method: 'POST',
         body: JSON.stringify({
           context: this._innerTubeContext,
@@ -256,7 +259,7 @@ export class SongSearcher {
   private async _initInnerTubeApiKey(): Promise<void> {
     const { body } = await request(`${youTubeBaseURL}?hl=en`);
     const jsonData = await JSON.parse((/ytcfg.set\(({.+?})\)/s.exec(await body.text()) as RegExpExecArray)[1]);
-    this._apikey = jsonData.INNERTUBE_API_KEY;
+    this._apiKey = jsonData.INNERTUBE_API_KEY;
     if (this._innerTubeContext === null || Object.keys(this._innerTubeContext ?? []).length === 0)
       this._innerTubeContext = jsonData.INNERTUBE_CONTEXT;
   }

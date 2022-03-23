@@ -21,7 +21,6 @@ import {
   Range,
   Song,
   AdvancedQueueOptions,
-  ClientVoiceSettingsOptions,
 } from '../utils/Interfaces';
 import {
   youTubePattern,
@@ -41,6 +40,8 @@ const ClientVoiceSettings = {
   deaf: true,
   requestToSpeak: false,
   suppressed: false,
+
+  [Symbol.iterator]: function * () {},
 
   /**
    * Sets if the client is deaf
@@ -67,18 +68,6 @@ const ClientVoiceSettings = {
    */
   setSuppressed(state: boolean): void {
     this.suppressed = state ?? false;
-  },
-
-  /**
-   * Extracts client voice settings values
-   * @returns {object}
-   */
-  extract(): ClientVoiceSettingsOptions {
-    return {
-      deaf: this.deaf,
-      requestToSpeak: this.requestToSpeak,
-      suppressed: this.suppressed,
-    };
   },
 };
 
@@ -481,16 +470,16 @@ export class Player extends EventEmitter {
           .repeat(
             Math.round(
               ProgressBarOptions.size *
-                ((currentQueue.ressource?.playbackDuration as number) / currentQueue.songs[0].msDuration),
+              ((currentQueue.ressource?.playbackDuration as number) / currentQueue.songs[0].msDuration),
             ),
           )
           .replace(/.$/, ProgressBarOptions.slider) +
         ProgressBarOptions.line.repeat(
           ProgressBarOptions.size -
-            Math.round(
-              ProgressBarOptions.size *
-                ((currentQueue.ressource?.playbackDuration as number) / currentQueue.songs[0].msDuration),
-            ),
+          Math.round(
+            ProgressBarOptions.size *
+            ((currentQueue.ressource?.playbackDuration as number) / currentQueue.songs[0].msDuration),
+          ),
         )
       );
     }
@@ -502,10 +491,9 @@ export class Player extends EventEmitter {
    * @private
    */
   private _setClientVoiceSettings(): void {
-    const extractedSettings = this.clientVoiceSettings.extract();
-    this.guild.me?.voice.setDeaf(extractedSettings.deaf);
-    this.guild.me?.voice.setRequestToSpeak(extractedSettings.requestToSpeak);
-    this.guild.me?.voice.setSuppressed(extractedSettings.suppressed);
+    this.guild.me?.voice.setDeaf(this.clientVoiceSettings.deaf);
+    this.guild.me?.voice.setRequestToSpeak(this.clientVoiceSettings.requestToSpeak);
+    this.guild.me?.voice.setSuppressed(this.clientVoiceSettings.suppressed);
   }
 
   /**
@@ -551,15 +539,20 @@ export class Player extends EventEmitter {
    * @private
    */
   private _createWritableStream(url: string): NodeJS.WritableStream {
-    const FFmpegTranscoder = new prism.FFmpeg({
+    const FFmpegTranscoder: prism.FFmpeg = new prism.FFmpeg({
       args: this._generateFFmpegArgsSchema(url),
       shell: false,
     });
-    const opusEncoder = new prism.opus.Encoder({ rate: 48000, channels: 2, frameSize: 960 });
+    const opusEncoder: prism.opus.Encoder = new prism.opus.Encoder({ rate: 48000, channels: 2, frameSize: 960 });
     const FFmpegStream = FFmpegTranscoder.pipe(opusEncoder);
     FFmpegStream.on(PrismOpusEncoderEvents.Close, () => {
       FFmpegTranscoder.destroy();
       opusEncoder.destroy();
+    });
+    FFmpegStream.on(PrismOpusEncoderEvents.Error, (err) => {
+      FFmpegTranscoder.destroy();
+      opusEncoder.destroy();
+      this.emit(PlayerEvents.Error, String(err.message));
     });
     return FFmpegStream;
   }

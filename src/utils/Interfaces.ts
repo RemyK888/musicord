@@ -109,6 +109,7 @@ export interface SearchedSong {
 }
 
 export interface SongSearcherOptions {
+  spotifyApiKey?: string;
   customInnertubeContext: {
     client: string;
     gl: string;

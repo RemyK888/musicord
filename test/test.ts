@@ -82,3 +82,13 @@ import { audioPattern } from '../src/utils/Constants';
 console.log(audioPattern.test('http://ccmixter.org/content/Lav/Lav_-_dark_quiet_night_(war_in_europe_2022_edition).mp3'))
 
 */
+
+import { Musicord, AudioFilters, SongSearcher } from '../src/index';
+
+const searcher = new SongSearcher();
+
+
+(async () => {
+    await searcher.spotifySearch('alicante')
+})();
+
