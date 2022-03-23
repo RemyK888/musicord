@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { Guild, GuildTextBasedChannel, StageChannel, TextChannel, VoiceChannel } from 'discord.js';
+import { Guild, GuildTextBasedChannel, StageChannel, TextChannel, VoiceBasedChannel, VoiceChannel } from 'discord.js';
 import {
   VoiceConnection,
   joinVoiceChannel,
@@ -10,6 +10,7 @@ import {
   AudioPlayerStatus,
   AudioPlayer,
   entersState,
+  AudioPlayerError,
 } from '@discordjs/voice';
 import prism from 'prism-media';
 
@@ -29,6 +30,7 @@ import {
   PlayerEvents,
   youTubePlaylistPattern,
   ProgressBarOptions,
+  PrismOpusEncoderEvents,
 } from '../utils/Constants';
 
 const sleep = (ms: number): Promise<unknown> => {
@@ -82,7 +84,7 @@ const ClientVoiceSettings = {
 
 export declare interface Player extends EventEmitter {
   /**
-   * Emitted when a track starts
+   * Emitted when a track starts.
    * @param {TextChannel|GuildTextBasedChannel} listener
    * @param {Song} listener
    * @event Player#trackStart
@@ -91,6 +93,97 @@ export declare interface Player extends EventEmitter {
     event: 'trackStart',
     listener: (channel: TextChannel | GuildTextBasedChannel, song: Song) => void | Promise<void> | any,
   ): this;
+
+  /**
+   * Emitted when a track is finished.
+   * @param {TextChannel|GuildTextBasedChannel} listener
+   * @param {Song} listener
+   * @event Player#trackFinished
+   */
+  on(
+    event: 'trackFinished',
+    listener: (channel: TextChannel | GuildTextBasedChannel, song: Song) => void | Promise<void> | any,
+  ): this;
+
+  /**
+   * Emitted when the music is turned off
+   * @param {Guild} listener
+   * @param {TextChannel|GuildTextBasedChannel} listener
+   * @event Player#pause
+   */
+  on(
+    event: 'pause',
+    listener: (guild: Guild, channel: TextChannel | GuildTextBasedChannel) => void | Promise<void> | any,
+  ): this;
+
+  /**
+   * Emitted when the music is turned on
+   * @param {Guild} listener
+   * @param {TextChannel|GuildTextBasedChannel} listener
+   * @event Player#resume
+   */
+  on(
+    event: 'resume',
+    listener: (guild: Guild, channel: TextChannel | GuildTextBasedChannel) => void | Promise<void> | any,
+  ): this;
+
+  /**
+   * Emitted when the music is stopped
+   * @param {Guild} listener
+   * @param {TextChannel|GuildTextBasedChannel} listener
+   * @event Player#stop
+   */
+  on(
+    event: 'stop',
+    listener: (guild: Guild, channel: TextChannel | GuildTextBasedChannel) => void | Promise<void> | any,
+  ): this;
+
+  /**
+   * Emitted when the client is connected to a voice channel.
+   * This event will not be emitted is you used the `assignVoiceConnection()` method.
+   * @param {Guild} listener
+   * @param {TextChannel|GuildTextBasedChannel} listener
+   * @param {VoiceBasedChannel|VoiceChannel} listener
+   * @event Player#connected
+   */
+  on(
+    event: 'connected',
+    listener: (
+      guild: Guild,
+      channel: TextChannel | GuildTextBasedChannel,
+      voiceChannel: VoiceBasedChannel | VoiceChannel,
+    ) => void | Promise<void> | any,
+  ): this;
+
+  /**
+   * Emitted when the client is disconnected to a voice channel.
+   * @param {Guild} listener
+   * @param {TextChannel|GuildTextBasedChannel} listener
+   * @param {VoiceBasedChannel|VoiceChannel} listener
+   * @event Player#disconnected
+   */
+  on(
+    event: 'disconnected',
+    listener: (
+      guild: Guild,
+      channel: TextChannel | GuildTextBasedChannel,
+      voiceChannel: VoiceBasedChannel | VoiceChannel,
+    ) => void | Promise<void> | any,
+  ): this;
+
+  /**
+   * Emitted when an error occured
+   * @param {AudioPlayerError|Error|string|any} listener
+   * @event Player#error
+   */
+  on(event: 'error', listener: (error: AudioPlayerError | Error | string | any) => void | Awaited<void> | any): this;
+
+  /**
+   * Emitted when a debug information is communicated by Discord.Js/voice
+   * @param {string} listener
+   * @event Player#debug
+   */
+  on(event: 'debug', listener: (msg: string) => void | Awaited<void> | any): this;
 }
 
 export class Player extends EventEmitter {
@@ -177,12 +270,14 @@ export class Player extends EventEmitter {
   public createVoiceConnection(): void {
     const currentQueue = this._queue.get(this.guild.id);
     if (currentQueue && !currentQueue.voiceChannel) return;
-    if (currentQueue)
+    if (currentQueue) {
       currentQueue.connection = joinVoiceChannel({
         channelId: currentQueue.voiceChannel?.id as string,
         guildId: this.guild.id,
         adapterCreator: this.guild.voiceAdapterCreator,
       });
+      this.emit(PlayerEvents.Connected, this.guild, currentQueue.textChannel, currentQueue?.voiceChannel);
+    }
   }
 
   /**
@@ -245,6 +340,7 @@ export class Player extends EventEmitter {
       currentQueue.connection = undefined;
       currentQueue.songs = [];
       currentQueue.ressource = undefined;
+      this.emit(PlayerEvents.Stop, this.guild, currentQueue.textChannel);
     }
   }
 
@@ -255,8 +351,10 @@ export class Player extends EventEmitter {
   public pause(): void {
     const currentQueue = this._queue.get(this.guild.id);
     if (currentQueue && currentQueue.ressource) {
-      if (currentQueue.ressource.audioPlayer?.state.status === AudioPlayerStatus.Playing)
+      if (currentQueue.ressource.audioPlayer?.state.status === AudioPlayerStatus.Playing) {
         currentQueue.ressource.audioPlayer?.pause(true);
+        this.emit(PlayerEvents.Pause, this.guild, currentQueue.textChannel);
+      }
     }
   }
 
@@ -270,8 +368,10 @@ export class Player extends EventEmitter {
       if (
         currentQueue.ressource.audioPlayer?.state.status === AudioPlayerStatus.Paused ||
         currentQueue.ressource.audioPlayer?.state.status === AudioPlayerStatus.AutoPaused
-      )
+      ) {
         currentQueue.ressource.audioPlayer?.unpause();
+        this.emit(PlayerEvents.Resume, this.guild, currentQueue.textChannel);
+      }
     }
   }
 
@@ -332,6 +432,7 @@ export class Player extends EventEmitter {
             channelId: (currentQueue.voiceChannel !== undefined ? currentQueue.voiceChannel.id : channel?.id) as string,
             adapterCreator: this.guild.voiceAdapterCreator,
           });
+          this.emit(PlayerEvents.Connected, this.guild, currentQueue.textChannel, currentQueue.voiceChannel ?? channel);
         } else return;
       }
       if (youTubePlaylistPattern.test(song as string)) {
@@ -455,7 +556,12 @@ export class Player extends EventEmitter {
       shell: false,
     });
     const opusEncoder = new prism.opus.Encoder({ rate: 48000, channels: 2, frameSize: 960 });
-    return FFmpegTranscoder.pipe(opusEncoder);
+    const FFmpegStream = FFmpegTranscoder.pipe(opusEncoder);
+    FFmpegStream.on(PrismOpusEncoderEvents.Close, () => {
+      FFmpegTranscoder.destroy();
+      opusEncoder.destroy();
+    });
+    return FFmpegStream;
   }
 
   /**

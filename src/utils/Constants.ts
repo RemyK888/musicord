@@ -41,9 +41,23 @@ export enum ExtendedAudioPlayerStatus {
 }
 
 export enum PlayerEvents {
-  Error = 'error',
-  Debug = 'debug',
   TrackStart = 'trackStart',
   TrackFinished = 'trackFinished',
+  Pause = 'pause',
+  Resume = 'resume',
+  Stop = 'stop',
+  Connected = 'connected',
   Disconnected = 'disconnected',
+  Error = 'error',
+  Debug = 'debug',
+}
+
+export enum PrismOpusEncoderEvents {
+  Close = 'close',
+  Data = 'data',
+  End = 'end',
+  Error = 'error',
+  Pause = 'pause',
+  Readable = 'readable',
+  Resume = 'resume',
 }
