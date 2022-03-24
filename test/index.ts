@@ -72,7 +72,7 @@ const rest = new REST({ version: '10' }).setToken('NzI2NTEwNjE3MDQ5MTcwMDAx.XveV
 
 
 
-import { AnyChannel, Client, Guild, TextInputStyle, ActionRow, EmbedBuilder } from 'discord.js';
+import { AnyChannel, Client, Guild, TextInputStyle, ActionRow, EmbedBuilder, GuildTextBasedChannel } from 'discord.js';
 import { ModalBuilder, TextInputBuilder, ActionRowBuilder, ButtonBuilder } from '@discordjs/builders'
 
 import { Musicord, AudioFilters, SongSearcher } from '../src/index';
@@ -104,7 +104,7 @@ client.on('interactionCreate', async (interaction) => {
           }
         } else {
           const queue = musicordPlayer.initQueue(interaction.guild as Guild, {
-            textChannel: interaction.channel ,
+            textChannel: interaction.channel as GuildTextBasedChannel ,
             voiceChannel: msgMember.voice.channel
           });
           if (queue) {

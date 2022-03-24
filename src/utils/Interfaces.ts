@@ -1,5 +1,13 @@
 import { AudioResource, VoiceConnection } from '@discordjs/voice';
-import { VoiceChannel, Guild, VoiceBasedChannel, StageChannel, TextChannel, GuildTextBasedChannel } from 'discord.js';
+import {
+  VoiceChannel,
+  Guild,
+  VoiceBasedChannel,
+  StageChannel,
+  TextChannel,
+  GuildTextBasedChannel,
+  TextBasedChannel,
+} from 'discord.js';
 
 export interface MusicordOptions {
   ytApiKey: string;
@@ -51,7 +59,7 @@ export interface AdvancedQueueOptions {
 }
 
 export interface InitQueueOptions {
-  textChannel: TextChannel | GuildTextBasedChannel;
+  textChannel: TextChannel | GuildTextBasedChannel | TextBasedChannel;
   voiceChannel?: VoiceBasedChannel | VoiceChannel | StageChannel;
   advancedOptions?: AdvancedQueueOptions;
 }
@@ -125,7 +133,7 @@ export interface SearchOptions {
 
 export interface QueueOptions {
   guild?: Guild;
-  textChannel?: TextChannel | GuildTextBasedChannel;
+  textChannel?: TextChannel | GuildTextBasedChannel | TextBasedChannel;
   voiceChannel?: VoiceBasedChannel | VoiceChannel | StageChannel;
   connection?: VoiceConnection | null;
   songs: Song[];

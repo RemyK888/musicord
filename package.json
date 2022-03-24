@@ -1,13 +1,13 @@
 {
     "name": "musicord",
-    "version": "beta-0.0.12",
+    "version": "0.0.1-beta",
     "description": "A simple, powerful, and user-friendly music package for your Discord bot. Supports v14 of DJS !",
     "main": "./src/index.ts",
     "scripts": {
         "format": "prettier --write \"src/**/*.ts\"",
-        "lint": "eslint -p tsconfig.json",
+        "lint": "eslint src --ext .ts",
         "build": "rimraf dist && tsc && gen-esm-wrapper ./dist/src/index.js ./dist/src/index.mjs",
-        "docs": "ts-docs ./src/index.ts"
+        "docs": "ts-docs"
     },
     "repository": {
         "type": "git",
@@ -44,6 +44,8 @@
         "@ts-docs/ts-docs": "^0.4.2",
         "@types/node": "^17.0.21",
         "@types/node-fetch": "^2.6.1",
+        "@typescript-eslint/eslint-plugin": "^5.16.0",
+        "@typescript-eslint/parser": "^5.16.0",
         "discord-api-types": "^0.28.0",
         "eslint": "^8.11.0",
         "gen-esm-wrapper": "^1.1.3",

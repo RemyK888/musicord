@@ -83,12 +83,4 @@ console.log(audioPattern.test('http://ccmixter.org/content/Lav/Lav_-_dark_quiet_
 
 */
 
-import { Musicord, AudioFilters, SongSearcher } from '../src/index';
-
-const searcher = new SongSearcher();
-
-
-(async () => {
-    await searcher.spotifySearch('alicante')
-})();
 

@@ -15,13 +15,7 @@ import {
 import prism from 'prism-media';
 
 import { SongSearcher } from './SongSearcher';
-import {
-  InitQueueOptions,
-  QueueOptions,
-  Range,
-  Song,
-  AdvancedQueueOptions,
-} from '../utils/Interfaces';
+import { InitQueueOptions, QueueOptions, Range, Song, AdvancedQueueOptions } from '../utils/Interfaces';
 import {
   youTubePattern,
   audioPattern,
@@ -41,7 +35,7 @@ const ClientVoiceSettings = {
   requestToSpeak: false,
   suppressed: false,
 
-  [Symbol.iterator]: function * () {},
+  [Symbol.iterator]: function* () {},
 
   /**
    * Sets if the client is deaf
@@ -201,7 +195,7 @@ export class Player extends EventEmitter {
      */
     this.guild = guild;
 
-    Object.assign(this.options, options?.advancedOptions);
+    if (options && options.advancedOptions) Object.assign(this.options, options?.advancedOptions);
     const currentQueue = this._queue.get(guild.id);
     if (options && options.advancedOptions?.autoJoin === true && currentQueue?.voiceChannel !== null) {
       try {
@@ -324,12 +318,14 @@ export class Player extends EventEmitter {
   public stop(): void {
     const currentQueue = this._queue.get(this.guild.id);
     if (currentQueue) {
+      this.emit(PlayerEvents.Stop, this.guild, currentQueue.textChannel);
       currentQueue.connection?.destroy();
       currentQueue.playing = false;
       currentQueue.connection = undefined;
       currentQueue.songs = [];
       currentQueue.ressource = undefined;
-      this.emit(PlayerEvents.Stop, this.guild, currentQueue.textChannel);
+      currentQueue.voiceChannel = undefined;
+      currentQueue.textChannel = undefined;
     }
   }
 
@@ -425,6 +421,7 @@ export class Player extends EventEmitter {
         } else return;
       }
       if (youTubePlaylistPattern.test(song as string)) {
+        console.log('coucou');
         const playlist = await this._songSearcher.fetchPlaylist(song as string);
         for (const e of playlist) {
           await this.addSong(e.url);
@@ -439,7 +436,7 @@ export class Player extends EventEmitter {
           noSubscriber: ('pause' || 'play') as NoSubscriberBehavior,
         },
       });
-      this._setClientVoiceSettings();
+      this._setClientVoiceSettings(currentQueue.voiceChannel);
       currentQueue.ressource = createAudioResource(this._createWritableStream(currentQueue.songs[0].streamURL) as any, {
         inputType: 'opus' as StreamType,
         inlineVolume: true,
@@ -470,16 +467,16 @@ export class Player extends EventEmitter {
           .repeat(
             Math.round(
               ProgressBarOptions.size *
-              ((currentQueue.ressource?.playbackDuration as number) / currentQueue.songs[0].msDuration),
+                ((currentQueue.ressource?.playbackDuration as number) / currentQueue.songs[0].msDuration),
             ),
           )
           .replace(/.$/, ProgressBarOptions.slider) +
         ProgressBarOptions.line.repeat(
           ProgressBarOptions.size -
-          Math.round(
-            ProgressBarOptions.size *
-            ((currentQueue.ressource?.playbackDuration as number) / currentQueue.songs[0].msDuration),
-          ),
+            Math.round(
+              ProgressBarOptions.size *
+                ((currentQueue.ressource?.playbackDuration as number) / currentQueue.songs[0].msDuration),
+            ),
         )
       );
     }
@@ -490,10 +487,12 @@ export class Player extends EventEmitter {
    * @returns {void}
    * @private
    */
-  private _setClientVoiceSettings(): void {
+  private _setClientVoiceSettings(voiceChannel: VoiceBasedChannel | undefined): void {
     this.guild.me?.voice.setDeaf(this.clientVoiceSettings.deaf);
-    this.guild.me?.voice.setRequestToSpeak(this.clientVoiceSettings.requestToSpeak);
-    this.guild.me?.voice.setSuppressed(this.clientVoiceSettings.suppressed);
+    if (voiceChannel?.isStage()) {
+      this.guild.me?.voice.setRequestToSpeak(this.clientVoiceSettings.requestToSpeak);
+      this.guild.me?.voice.setSuppressed(this.clientVoiceSettings.suppressed);
+    }
   }
 
   /**

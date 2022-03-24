@@ -27,9 +27,9 @@ export class Musicord {
   /**
    * Initializes a new queue if it does not exist.
    * Update the queue if it already exists.
-   * @param {Guild} guild
-   * @param {InitQueueOptions} options
-   * @returns {Player}
+   * @param {Guild} guild Message guild
+   * @param {InitQueueOptions} options Options to init queue *(required)*
+   * @returns {Player} An audio player
    */
   public initQueue(guild: Guild, options: InitQueueOptions): Player {
     if (!guild || guild instanceof Guild === false) throw new TypeError('');
@@ -46,7 +46,7 @@ export class Musicord {
   /**
    * Deletes the queue for this guild
    * @param {Guild} guild The queue guild
-   * @returns {void}
+   * @returns {void} Void
    */
   public deleteQueue(guild: Guild): void {
     if (this.existQueue(guild)) this.queue.delete(guild.id);
@@ -54,8 +54,8 @@ export class Musicord {
 
   /**
    * Chekcks if a queue exists
-   * @param {Guild} guild
-   * @returns {boolean}
+   * @param {Guild} guild The queue guild
+   * @returns {boolean} Boolean
    */
   public existQueue(guild: Guild): boolean {
     return this.queue.has(guild.id);
@@ -63,8 +63,8 @@ export class Musicord {
 
   /**
    * Gets a specific queue
-   * @param {Guild} guild
-   * @returns {Player|undefined}
+   * @param {Guild} guild The queue guild
+   * @returns {Player|undefined} Player|undefined
    */
   public getQueue(guild: Guild): Player | undefined {
     if (!guild || guild instanceof Guild == false) throw new TypeError('');
@@ -74,8 +74,8 @@ export class Musicord {
 
   /**
    * Gets queue infos
-   * @param {Guild} guild
-   * @returns {QueueOptions|undefined}
+   * @param {Guild} guild The queue guild
+   * @returns {QueueOptions|undefined} QueueOptions|undefined
    */
   public getQueueInfo(guild: Guild): QueueOptions | undefined {
     return this.queue.get(guild.id);
@@ -83,9 +83,9 @@ export class Musicord {
 
   /**
    * Generates what will be stored in the queue.
-   * @param {Guild} guild
-   * @param {InitQueueOptions} options
-   * @returns {QueueOptions}
+   * @param {Guild} guild The queue guild
+   * @param {InitQueueOptions} options Options to init the queue
+   * @returns {QueueOptions} QueueOptions
    */
   private _generateQueueSchema(guild: Guild, options: InitQueueOptions): QueueOptions {
     return {

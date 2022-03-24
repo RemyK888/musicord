@@ -20,6 +20,9 @@
     ],
     "exclude": [
         "node_modules",
-        "test"
+        "test",
+        "docs",
+        "pages",
+        "tsdoc.config.js"
     ]
 }
