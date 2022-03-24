@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://media.discordapp.net/attachments/550365717996896278/956351450236223518/logo_musicord.png?width=1440&height=320" alt="Musicord logo">
+  <img src="https://cdn.discordapp.com/attachments/801037931195662336/956614847250956318/logo_progress_bar.png?width=1440&height=320" alt="Musicord logo">
   <img src="https://forthebadge.com/images/badges/made-with-typescript.svg" alt="Made with Typescript"> 
   <br>
   <img src="https://img.shields.io/npm/dt/discord-together?style=for-the-badge" alt="Downloads">
