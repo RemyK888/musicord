@@ -83,4 +83,12 @@ console.log(audioPattern.test('http://ccmixter.org/content/Lav/Lav_-_dark_quiet_
 
 */
 
+import { SongSearcher } from '../src/structures/SongSearcher';
+
+const songSearcher = new SongSearcher();
+
+(async () => {
+    const playlist = await songSearcher.extractPlaylistInfo('https://www.youtube.com/watch?v=JuWUTsIBx5Q&list=PLUarU1HDBmlyQe9X4oxhpgY17xhURd1bl')
+    console.log(playlist.title);
+})()
 

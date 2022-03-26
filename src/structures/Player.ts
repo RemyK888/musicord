@@ -210,13 +210,37 @@ export class Player extends EventEmitter {
    * Checks if the bot is currently playing
    * @returns {boolean}
    */
-  public isPlaying(): boolean {
+  get isPlaying(): boolean {
     return this._queue.get(this.guild.id)?.playing ?? false;
   }
 
   /**
+   * Gets the queue volume
+   * @returns {number}
+   */
+  get volume(): number {
+    return this._queue.get(this.guild.id)?.volume ?? 0.5;
+  }
+
+  /**
+   * Gets the queue filters
+   * @returns {string[]}
+   */
+  get filters(): string[] {
+    return this._queue.get(this.guild.id)?.filters ?? [];
+  }
+
+  /**
+   * Gets the queue songs
+   * @returns {Song[]}
+   */
+  get queue(): Song[] {
+    return this._queue.get(this.guild.id)?.songs ?? [];
+  }
+
+  /**
    * Assigns an existing voice connection to the queue.
-   * @param {VoiceConnection} connection {@link https://discord.js.org/#/docs/voice/stable/class/VoiceConnection The voice connection}
+   * @param {VoiceConnection} connection {@link https://discord.js.org/#/docs/voice/stable/class/VoiceConnection Voice connection}
    * @returns {void}
    */
   public assignVoiceConnection(connection: VoiceConnection): void {
@@ -243,6 +267,35 @@ export class Player extends EventEmitter {
           streamURL: song,
         } as Song);
       } else return;
+    }
+  }
+
+  /**
+   * Adds playlist songs to the queue
+   * Only the first 100 songs will be added.
+   * @param {string} url
+   * @returns {Promise<void>}
+   */
+  public async addPlaylist(url: string): Promise<void> {
+    if (!url || !url.includes('list') || !youTubePlaylistPattern.test(url)) throw new TypeError('');
+    const playlist = await this._songSearcher.fetchPlaylist(url);
+    for (const video of playlist) {
+      await this.addSong(video.url);
+    }
+  }
+
+  /**
+   * Set the ressource or channel bitrate.
+   * Default value is 64000.
+   * @param {number} value
+   * @returns {void}
+   */
+  public setBitrate(value?: number): void {
+    const currentQueue = this._queue.get(this.guild.id);
+    if (currentQueue) {
+      if ((value && currentQueue.ressource) || currentQueue.playing)
+        currentQueue.ressource?.encoder?.setBitrate(value as number);
+      else if (currentQueue.voiceChannel) currentQueue.voiceChannel.bitrate = 64000;
     }
   }
 
@@ -320,12 +373,18 @@ export class Player extends EventEmitter {
     if (currentQueue) {
       this.emit(PlayerEvents.Stop, this.guild, currentQueue.textChannel);
       currentQueue.connection?.destroy();
-      currentQueue.playing = false;
-      currentQueue.connection = undefined;
-      currentQueue.songs = [];
-      currentQueue.ressource = undefined;
-      currentQueue.voiceChannel = undefined;
-      currentQueue.textChannel = undefined;
+      this._queue.delete(this.guild.id);
+    }
+  }
+
+  /**
+   * Skips the current song.
+   * @returns {void}
+   */
+  public skip(): void {
+    const currentQueue = this._queue.get(this.guild.id);
+    if (currentQueue) {
+      currentQueue.ressource?.audioPlayer?.stop();
     }
   }
 
@@ -400,15 +459,9 @@ export class Player extends EventEmitter {
     let currentQueue = this._queue.get(this.guild.id);
     if (currentQueue) {
       if (currentQueue.playing === true) {
-        if (youTubePlaylistPattern.test(song as string)) {
-          const playlist = await this._songSearcher.fetchPlaylist(song as string);
-          for (const e of playlist) {
-            await this.addSong(e.url);
-          }
-          return;
-        } else {
-          return await this.addSong(typeof song === 'string' ? song : song.url);
-        }
+        if (song.toString().includes('list') && youTubePlaylistPattern.test(song as string))
+          return this.addPlaylist(song as string);
+        else return await this.addSong(typeof song === 'string' ? song : song.url);
       }
       if (!(currentQueue.connection instanceof VoiceConnection)) {
         if (channel || currentQueue.voiceChannel !== undefined) {
@@ -420,13 +473,9 @@ export class Player extends EventEmitter {
           this.emit(PlayerEvents.Connected, this.guild, currentQueue.textChannel, currentQueue.voiceChannel ?? channel);
         } else return;
       }
-      if (youTubePlaylistPattern.test(song as string)) {
-        console.log('coucou');
-        const playlist = await this._songSearcher.fetchPlaylist(song as string);
-        for (const e of playlist) {
-          await this.addSong(e.url);
-        }
-      } else {
+      if (song.toString().includes('list') && youTubePlaylistPattern.test(song as string))
+        this.addPlaylist(song as string);
+      else {
         if (currentQueue.songs === [] || currentQueue.songs[0]?.url !== song)
           await this.addSong(typeof song === 'string' ? song : song.url);
       }
@@ -550,7 +599,11 @@ export class Player extends EventEmitter {
     });
     FFmpegStream.on(PrismOpusEncoderEvents.Error, (err) => {
       FFmpegTranscoder.destroy();
-      opusEncoder.destroy();
+      try {
+        opusEncoder.destroy();
+      } catch (encoderErr) {
+        this.emit(PlayerEvents.StreamError, encoderErr);
+      }
       this.emit(PlayerEvents.Error, String(err.message));
     });
     return FFmpegStream;

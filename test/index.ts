@@ -41,6 +41,10 @@ const commandsSchema = new ApplicationCommandSchema({
     description: 'CA VA MARCHER',
     implemented: true
   },
+  skip: {
+    description: 'Saute un son de la playlist',
+    implemented: true
+  },
   getplaylist: {
     description: 'Recuperer les infos d\'une playlist ou d\'un mix',
     implemented: true,
@@ -99,8 +103,8 @@ client.on('interactionCreate', async (interaction) => {
           if (queue) await queue.play(msgArgs as any, msgMember.voice.channel);
           const queueInfo = musicordPlayer.getQueueInfo(interaction.guild as Guild);
           if (queueInfo && queue) {
-            if (queue.isPlaying()) return interaction.reply(`En train de jouer ${queueInfo.songs[0].title}`)
-            else return interaction.reply(`${queueInfo.songs[0].title} a été ajouté à la playlist`)
+            if (queue.isPlaying) return interaction.reply(`${queueInfo.songs[1].title} a été ajouté à la playlist`)
+            else return interaction.reply(`${queueInfo.songs[1].title} a été ajouté à la playlist`)
           }
         } else {
           const queue = musicordPlayer.initQueue(interaction.guild as Guild, {
@@ -141,6 +145,14 @@ client.on('interactionCreate', async (interaction) => {
         // @ts-ignore
         queue.pause();
         interaction.reply('La musique a bien été mise en pause')
+      }
+    }
+    else if (interaction.commandName === 'skip') {
+      if (musicordPlayer.existQueue(interaction.guild as Guild)) {
+        const queue = musicordPlayer.getQueue(interaction.guild as Guild);
+        // @ts-ignore
+        queue.skip()
+        interaction.reply('La musique a bien été sautée')
       }
     }
     else if (interaction.commandName === 'resume') {

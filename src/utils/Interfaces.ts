@@ -32,6 +32,7 @@ export interface ApplicationCommandSchemaOptions {
   resume?: CommandOptions;
   ping?: CommandOptions;
   getplaylist?: CommandOptions;
+  skip?: CommandOptions;
 }
 
 type DJSSlashCommandsType = 'STRING' | 'BOOLEAN' | 'NUMBER' | 'CHANNEL';

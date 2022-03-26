@@ -1,6 +1,6 @@
 export const youTubePattern: RegExp = /(youtu\.be\/|youtube\.com\/(watch\?(.*&)?v=|(embed|v)\/))([^\?&"'>]+)/;
 export const audioPattern: RegExp = /(?:((?:https|http):\/\/)|(?:\/)).+(?:.mp3|mp4)/gm;
-export const youTubePlaylistPattern: RegExp = /^https?:\/\/(www.youtube.com|youtube.com)\/playlist(.*)$/;
+export const youTubePlaylistPattern: RegExp = /^.*(youtu.be\/|list=)([^#\&\?]*).*/;
 
 export const youTubeBaseURL = 'https://www.youtube.com';
 export const innerTubeApiURL = 'https://www.youtube.com/youtubei/v1';
@@ -49,6 +49,7 @@ export enum PlayerEvents {
   Connected = 'connected',
   Disconnected = 'disconnected',
   Error = 'error',
+  StreamError = 'streamError',
   Debug = 'debug',
 }
 

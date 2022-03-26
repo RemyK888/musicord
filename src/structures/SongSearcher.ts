@@ -105,7 +105,8 @@ export class SongSearcher {
    * @returns {Promise<SearchedPlaylist[]>}
    */
   public async fetchPlaylist(url: string): Promise<SearchedPlaylist[]> {
-    if (!url || typeof url !== 'string' || !youTubePlaylistPattern.test(url)) throw new TypeError('');
+    if (!url || typeof url !== 'string' || !youTubePlaylistPattern.test(url) || !url.includes('list'))
+      throw new TypeError('');
     if (this._apiKey === undefined) await this._initInnerTubeApiKey();
     const playlistId = url.match(/[?&]list=([^#\&\?]+)/)![1];
     const isMix: boolean = playlistId.startsWith('RD');
@@ -171,7 +172,8 @@ export class SongSearcher {
    * @returns
    */
   public async extractPlaylistInfo(url: string): Promise<Playlist> {
-    if (!url || typeof url !== 'string' || !youTubePlaylistPattern.test(url)) throw new TypeError('');
+    if (!url || typeof url !== 'string' || !youTubePlaylistPattern.test(url) || !url.includes('list'))
+      throw new TypeError('coucou');
     if (this._apiKey === undefined) await this._initInnerTubeApiKey();
     const playlistId = url.match(/[?&]list=([^#\&\?]+)/)![1];
     const isMix: boolean = playlistId.startsWith('RD');
