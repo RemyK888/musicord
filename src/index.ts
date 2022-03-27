@@ -4,7 +4,7 @@ export { version } from '../package.json';
 
 export * from './structures/Musicord';
 export * from './structures/SongSearcher';
-export * from './structures/ApplicationCommandSchema';
+export * from './structures/ApplicationCommandsSchema';
 
 export const AudioFilters = new FFmpegAudioFilters();
 

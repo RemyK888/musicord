@@ -2,9 +2,9 @@ import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 
 
-import { ApplicationCommandSchema } from '../src/structures/ApplicationCommandSchema';
+import { ApplicationCommandsSchema } from '../src/structures/ApplicationCommandsSchema';
 
-const commandsSchema = new ApplicationCommandSchema({
+const commandsSchema = new ApplicationCommandsSchema({
   play: {
     description: 'Jouer un morceau',
     implemented: true,

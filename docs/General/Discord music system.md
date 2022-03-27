@@ -17,11 +17,13 @@ For more information about this project, join the [Discord server of RemyK Dev](
  - [NPM](https://www.npmjs.com/package/discord-music-system)
  - [Github](https://github.com/RemyK888/discord-music-system)
 
-<br>
+
 
 <img src="https://nodei.co/npm/discord-music-system.png">
-<br>
+
+
 <img src="https://forthebadge.com/images/badges/made-with-javascript.svg">
-<br>
+
+
 <img src="https://img.shields.io/npm/dt/discord-music-system?style=for-the-badge">
 

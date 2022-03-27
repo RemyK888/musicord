@@ -24,7 +24,7 @@ export interface CommandOptions {
   };
 }
 
-export interface ApplicationCommandSchemaOptions {
+export interface ApplicationCommandsSchemaOptions {
   play?: CommandOptions;
   pause?: CommandOptions;
   stop?: CommandOptions;
@@ -37,7 +37,7 @@ export interface ApplicationCommandSchemaOptions {
 
 type DJSSlashCommandsType = 'STRING' | 'BOOLEAN' | 'NUMBER' | 'CHANNEL';
 
-export interface DJSApplicationCommandSchema {
+export interface DJSApplicationCommandsSchema {
   name: string;
   description: string;
   options?: {

@@ -1,11 +1,11 @@
-import { CommandOptions, DJSApplicationCommandSchema, ApplicationCommandSchemaOptions } from '../utils/Interfaces';
+import { CommandOptions, DJSApplicationCommandsSchema, ApplicationCommandsSchemaOptions } from '../utils/Interfaces';
 
-export class ApplicationCommandSchema {
-  public readonly commands: ApplicationCommandSchemaOptions;
+export class ApplicationCommandsSchema {
+  public readonly commands: ApplicationCommandsSchemaOptions;
 
   /**
    * Creates a new ApplicationCommandSchema.
-   * @param {ApplicationCommandSchemaOptions} options ApplicationCommandSchema options
+   * @param {ApplicationCommandsSchemaOptions} options ApplicationCommandSchema options
    * @constructor
    * @example
    * const { ApplicationCommandSchema } = require()
@@ -20,7 +20,7 @@ export class ApplicationCommandSchema {
    *      }
    * });
    */
-  constructor(options: ApplicationCommandSchemaOptions) {
+  constructor(options: ApplicationCommandsSchemaOptions) {
     if (!options || typeof options !== 'object') throw new TypeError('Options must be an object');
     this.commands = options;
   }
@@ -31,10 +31,10 @@ export class ApplicationCommandSchema {
    * @example
    * await rest.put(Routes.applicationGuildCommands('clientID', 'guildID'), { body: commandsSchema.extract() });
    */
-  public extract(): DJSApplicationCommandSchema[] | [] {
+  public extract(): DJSApplicationCommandsSchema[] | [] {
     const slashCommandsName: string[] = Object.keys(this.commands);
     const slashCommandsValues: CommandOptions[] = Object.values(this.commands);
-    const extractData: DJSApplicationCommandSchema[] = [];
+    const extractData: DJSApplicationCommandsSchema[] = [];
     for (const e in this.commands) {
       if (slashCommandsValues[slashCommandsName.indexOf(e)].implemented == false) continue;
       extractData.push({
