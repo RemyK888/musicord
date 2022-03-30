@@ -33,7 +33,7 @@ Please provide any relevant information about your setup. This is important in c
 
 * Operating system:
 * Discord.Js version:
-* Musicord version:
+* Playcord version:
 * Node version:
 * NPM version:
 

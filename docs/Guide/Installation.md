@@ -12,9 +12,9 @@ First of all, you need to install [@discordjs/opus](https://www.npmjs.com/packag
 $ npm install @discordjs/opus ffmpeg
 ```
 
-Afterwards, you can install [musicord]()
+Afterwards, you can install [playcord](https://www.npmjs.com/package/playcord)
 ```sh
-$ npm install musicord
+$ npm install playcord
 ```
 
 ## ⚡ Recommended dependencies

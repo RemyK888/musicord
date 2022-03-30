@@ -9,7 +9,7 @@ import {
   TextBasedChannel,
 } from 'discord.js';
 
-export interface MusicordOptions {
+export interface PlaycordOptions {
   ytApiKey: string;
 }
 

@@ -5,7 +5,7 @@ order: 2
 
 # 🎵 Discord music system
 
-The ancestor of musicord is the NPM package named **"discord-music-system".**
+The ancestor of playcord is the NPM package named **"discord-music-system".**
 
 Although developed in 2020, and not much updated since May 2021, it remains fully functional for Discord bots integrating [Discord.js version 12](https://www.npmjs.com/package/discord.js/v/12.5.3) and the corresponding version of [@discordjs/opus](https://www.npmjs.com/package/@discordjs/opus/v/0.5.0).
 

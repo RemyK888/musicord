@@ -1,5 +1,5 @@
 {
-    "name": "musicord",
+    "name": "playcord",
     "version": "0.0.1-beta",
     "description": "A simple, powerful, and user-friendly music package for your Discord bot. Supports v14 of DJS !",
     "main": "./src/index.ts",
@@ -7,11 +7,12 @@
         "format": "prettier --write \"src/**/*.ts\"",
         "lint": "eslint src --ext .ts",
         "build": "rimraf dist && tsc && gen-esm-wrapper ./dist/src/index.js ./dist/src/index.mjs",
-        "docs": "ts-docs"
+        "docs": "ts-docs",
+        "test": "ts-node ./test/index.ts"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/RemyK888/musicord.git"
+        "url": "git+https://github.com/RemyK888/playcord.git"
     },
     "keywords": [
         "discord-music-system",
@@ -28,9 +29,9 @@
     "author": "RemyK",
     "license": "Apache-2.0",
     "bugs": {
-        "url": "https://github.com/RemyK888/musicord/issues"
+        "url": "https://github.com/RemyK888/playcord/issues"
     },
-    "homepage": "https://github.com/RemyK888/musicord#readme",
+    "homepage": "https://github.com/RemyK888/playcord#readme",
     "dependencies": {
         "@discordjs/voice": "^0.9.0-dev.1647259738.2297c2b",
         "discord.js": "^14.0.0-dev.1647259751.2297c2b",

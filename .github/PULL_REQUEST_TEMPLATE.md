@@ -23,7 +23,7 @@ Please describe the tests that you ran to verify your changes. Provide instructi
 **Test Configuration**:
 * Operating system:
 * Discord.Js version:
-* Musicord version:
+* Playcord version:
 * Node version:
 * NPM version:
 

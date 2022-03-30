@@ -1,4 +1,4 @@
-# Contributing to Musicord
+# Contributing to Playcord
 We love your input! We want to make contributing to this project as easy and transparent as possible, whether it's:
 
 - Reporting a bug
@@ -21,8 +21,8 @@ We use github to host code, to track issues and feature requests, as well as acc
 ## Any contributions you make will be under the Apache 2.0  License
 In short, when you submit code changes, your submissions are understood to be under the same [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0) that covers the project. Feel free to contact the maintainers if that's a concern.
 
-## Report bugs using Github's [issues](https://github.com/RemyK888/musicord/issues)
-We use GitHub issues to track public bugs. Report a bug by [opening a new issue](https://github.com/RemyK888/musicord/issues/new); it's that easy!
+## Report bugs using Github's [issues](https://github.com/RemyK888/playcord/issues)
+We use GitHub issues to track public bugs. Report a bug by [opening a new issue](https://github.com/RemyK888/playcord/issues/new); it's that easy!
 
 ## Write bug reports with detail, background, and sample code
 

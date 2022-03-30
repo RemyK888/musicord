@@ -178,7 +178,7 @@ export class Player extends EventEmitter {
 
   /**
    * Creates a new Player.
-   * @param {Map<string, QueueOptions>} queue The Musicord queue
+   * @param {Map<string, QueueOptions>} queue The Playcord queue
    * @param {Guild} guild current guild
    */
   constructor(queue: Map<string, QueueOptions>, guild: Guild, options?: InitQueueOptions) {

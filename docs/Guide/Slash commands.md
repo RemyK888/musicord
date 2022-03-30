@@ -5,7 +5,7 @@ order: 2
 
 # 🔧 Slash commands
 
-In order to integrate slash commands easily to your bot, musicord offers you a customized solution.
+In order to integrate slash commands easily to your bot, playcord offers you a customized solution.
 
 ## 📀 ApplicationCommandsSchema
 
