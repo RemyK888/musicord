@@ -111,7 +111,7 @@ export class FFmpegAudioFilters {
   }
 
   /**
-   * 10 bands equalizer
+   * 10 band equalizer
    * @param {FFmpegCustomEqualizerOptions} options At least 1 band is required **(percentage)**
    * @returns {string}
    * @example

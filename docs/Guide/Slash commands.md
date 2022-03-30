@@ -21,7 +21,7 @@ $ npm install @discordjs/rest
 Then you can easily integrate this class into your code. Here is an example of what your code could look like:
 
 ```js
-import { REST } from '@discordjs/rest';
+const { REST } = require('@discordjs/rest');
 
 const commandsSchema = new ApplicationCommandsSchema({
   play: {
@@ -56,5 +56,7 @@ const rest = new REST({ version: '10' }).setToken('token');
 })();
 
 ```
+
+
 The 'type' parameter is the type of the argument if required. By default, type 3, corresponding to a textual argument, is selected.
 For more information, please refer to [this paragraph](https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types) of the [Discord documentation](https://discord.com/developers/docs/intro).

@@ -88,7 +88,7 @@ import { SongSearcher } from '../src/structures/SongSearcher';
 const songSearcher = new SongSearcher();
 
 (async () => {
-    const playlist = await songSearcher.extractPlaylistInfo('https://www.youtube.com/watch?v=JuWUTsIBx5Q&list=PLUarU1HDBmlyQe9X4oxhpgY17xhURd1bl')
-    console.log(playlist.title);
+    const searchedPlaylist = await songSearcher.fetchPlaylist('playlist/mixtape URL');
+    console.log(searchedPlaylist[0]);
 })()
 

@@ -145,9 +145,7 @@ export class SongSearcher {
         }),
       });
       const json = await body.json();
-
       const playlistTracks = json.contents.twoColumnWatchNextResults.playlist.playlist.contents;
-
       for (const e of playlistTracks) {
         maxResults--;
         if (maxResults === 0) break;
