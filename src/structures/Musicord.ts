@@ -32,8 +32,8 @@ export class Musicord {
    * @returns {Player} An audio player
    */
   public initQueue(guild: Guild, options: InitQueueOptions): Player {
-    if (!guild || guild instanceof Guild === false) throw new TypeError('');
-    if (!options || typeof options !== 'object') throw new TypeError('');
+    if (!guild || guild instanceof Guild === false) throw new TypeError('A Guild is required to initialize a queue');
+    if (!options || typeof options !== 'object') throw new TypeError('Some options are required to initialize a queue');
     if (!this.existQueue(guild)) this.queue.set(guild.id, this._generateQueueSchema(guild, options));
     else {
       const currentQueue = this.queue.get(guild.id);
@@ -67,7 +67,7 @@ export class Musicord {
    * @returns {Player|undefined} Player|undefined
    */
   public getQueue(guild: Guild): Player | undefined {
-    if (!guild || guild instanceof Guild == false) throw new TypeError('');
+    if (!guild || guild instanceof Guild == false) throw new TypeError('A Guild is required to initialize a queue');
     if (this.existQueue(guild)) return new Player(this.queue, guild);
     else return undefined;
   }

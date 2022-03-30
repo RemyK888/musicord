@@ -63,7 +63,7 @@ export class FFmpegAudioFilters {
    * @returns {string}
    */
   public pingPongDelay(value: number): string {
-    if (!value || typeof value !== 'number') throw new TypeError('');
+    if (!value || typeof value !== 'number') throw new TypeError('The time limit as a number is required');
     return `adelay=${Math.round(value * 100)}|0|${Math.round((value * 100) / 3)}`;
   }
 
@@ -73,7 +73,7 @@ export class FFmpegAudioFilters {
    * @returns {string}
    */
   public speed(value: number): string {
-    if (!value || !this._isBetween(value, 50, 1000)) throw new TypeError('');
+    if (!value || !this._isBetween(value, 50, 1000)) throw new TypeError('A value between 50 and 1000 is required for the speed');
     return `atempo${value / 100}`;
   }
 
@@ -96,7 +96,7 @@ export class FFmpegAudioFilters {
    * @returns {string}
    */
   public tremolo(value: number): string {
-    if (!value || !this._isBetween(value, 0.1, 20000)) throw new TypeError('');
+    if (!value || !this._isBetween(value, 0.1, 20000)) throw new TypeError('The tremolo intensity, between 0.1 and 20000 is required');
     return `tremolo${value}`;
   }
 
@@ -106,7 +106,7 @@ export class FFmpegAudioFilters {
    * @returns {number}
    */
   public volume(value: number): string {
-    if (!value || typeof value !== 'number') throw new TypeError('');
+    if (!value || typeof value !== 'number') throw new TypeError('Volume as a number is required');
     return `volume=volume=${value}`;
   }
 
@@ -130,7 +130,7 @@ export class FFmpegAudioFilters {
    */
   public customEqualizer(options: FFmpegCustomEqualizerOptions): string {
     if (!options || (typeof options !== 'object' && Object.getPrototypeOf(options) == Object.prototype))
-      throw new TypeError('');
+      throw new TypeError('At least one band of the equalizer is required.');
     let toReturn = 'superequalizer=';
     for (const [band, gain] of Object.entries(Object(options)))
       toReturn += `${
@@ -151,7 +151,7 @@ export class FFmpegAudioFilters {
    * @returns {string}
    */
   public customFilter(filter: string): string {
-    if (!filter || typeof filter !== 'string') throw new TypeError('');
+    if (!filter || typeof filter !== 'string') throw new TypeError('A textual value is required');
     return filter;
   }
 

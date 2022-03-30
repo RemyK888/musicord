@@ -46,7 +46,7 @@ export class SongSearcher {
    * @returns {Promise<SearchedSong[]>}
    */
   public async search(args: string, options?: SearchOptions): Promise<SearchedSong[]> {
-    if (!args || typeof args !== 'string' || youTubePattern.test(args)) throw new TypeError('');
+    if (!args || typeof args !== 'string' || youTubePattern.test(args)) throw new TypeError('A valid search term or youtube URL is required to search for a song');
     if (this._apiKey === undefined) await this._initInnerTubeApiKey();
     this._limit = options?.maxResults ?? 10;
     const { body } = await request(`${innerTubeApiURL}/search?key=${this._apiKey}`, {
@@ -74,7 +74,7 @@ export class SongSearcher {
    * @returns {Promise<Song>}
    */
   public async extractVideoInfo(url: string): Promise<Song> {
-    if (!url || typeof url !== 'string' || !youTubePattern.test(url)) throw new TypeError('');
+    if (!url || typeof url !== 'string' || !youTubePattern.test(url)) throw new TypeError('A valid youtube URL is required to extract information from a video');
     if (this._apiKey === undefined) await this._initInnerTubeApiKey();
     const { body } = await request(`${innerTubeApiURL}/player?key=${this._apiKey}`, {
       method: 'POST',
@@ -106,7 +106,7 @@ export class SongSearcher {
    */
   public async fetchPlaylist(url: string): Promise<SearchedPlaylist[]> {
     if (!url || typeof url !== 'string' || !youTubePlaylistPattern.test(url) || !url.includes('list'))
-      throw new TypeError('');
+      throw new TypeError('To fetch a playlist you must insert a valid Youtube playlist URL');
     if (this._apiKey === undefined) await this._initInnerTubeApiKey();
     const playlistId = url.match(/[?&]list=([^#\&\?]+)/)![1];
     const isMix: boolean = playlistId.startsWith('RD');

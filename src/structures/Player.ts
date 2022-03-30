@@ -185,8 +185,8 @@ export class Player extends EventEmitter {
     super({
       captureRejections: true,
     });
-    if (!queue || queue.constructor !== Map) throw new Error('');
-    if (!guild || guild instanceof Guild == false) throw new Error('');
+    if (!queue || queue.constructor !== Map) throw new Error('The queue is required to create a player');
+    if (!guild || guild instanceof Guild == false) throw new Error('The guild is required to create a player');
     this._queue = queue;
 
     /**
@@ -244,7 +244,7 @@ export class Player extends EventEmitter {
    * @returns {void}
    */
   public assignVoiceConnection(connection: VoiceConnection): void {
-    if (!connection || connection instanceof VoiceConnection === false) throw new TypeError('');
+    if (!connection || connection instanceof VoiceConnection === false) throw new TypeError('A voice connection is required to assign it to the queue');
     const currentQueue = this._queue.get(this.guild.id);
     if (currentQueue) currentQueue.connection = connection;
   }
@@ -255,7 +255,7 @@ export class Player extends EventEmitter {
    * @returns {Promise<void>}
    */
   public async addSong(song: Song | string): Promise<void> {
-    if (!song) throw new TypeError('');
+    if (!song) throw new TypeError('A song is required to add it to the queue');
     const currentQueue = this._queue.get(this.guild.id);
     if (currentQueue && currentQueue.songs) {
       if (typeof song === 'string' && youTubePattern.test(song)) {
@@ -277,7 +277,7 @@ export class Player extends EventEmitter {
    * @returns {Promise<void>}
    */
   public async addPlaylist(url: string): Promise<void> {
-    if (!url || !url.includes('list') || !youTubePlaylistPattern.test(url)) throw new TypeError('');
+    if (!url || !url.includes('list') || !youTubePlaylistPattern.test(url)) throw new TypeError('A valid YouTube playlist URL is required to add videos from this playlist to the queue');
     const playlist = await this._songSearcher.fetchPlaylist(url);
     for (const video of playlist) {
       await this.addSong(video.url);
@@ -321,7 +321,7 @@ export class Player extends EventEmitter {
    * @param {string} filter
    */
   public setFilter(filter: string, applied?: boolean): void {
-    if (!filter || typeof filter !== 'string') throw new TypeError('');
+    if (!filter || typeof filter !== 'string') throw new TypeError('A filter is required to apply it');
     const currentQueue = this._queue.get(this.guild.id);
     if (currentQueue) {
       if (applied === false) {
@@ -455,7 +455,7 @@ export class Player extends EventEmitter {
    * @returns {Promise<void>}
    */
   public async play(song: Song | string, channel?: VoiceChannel | StageChannel): Promise<void> {
-    if (!song) throw new TypeError('');
+    if (!song) throw new TypeError('A song is required to play it');
     let currentQueue = this._queue.get(this.guild.id);
     if (currentQueue) {
       if (currentQueue.playing === true) {
