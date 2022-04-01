@@ -12,7 +12,7 @@
         "strictBindCallApply": true,
         "moduleResolution": "node",
         "resolveJsonModule": true,
-        "esModuleInterop": true,
+        "esModuleInterop": false,
         "forceConsistentCasingInFileNames": true
     },
     "include": [
