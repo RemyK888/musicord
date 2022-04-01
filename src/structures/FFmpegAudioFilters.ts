@@ -73,7 +73,8 @@ export class FFmpegAudioFilters {
    * @returns {string}
    */
   public speed(value: number): string {
-    if (!value || !this._isBetween(value, 50, 1000)) throw new TypeError('A value between 50 and 1000 is required for the speed');
+    if (!value || !this._isBetween(value, 50, 1000))
+      throw new TypeError('A value between 50 and 1000 is required for the speed');
     return `atempo${value / 100}`;
   }
 
@@ -96,7 +97,8 @@ export class FFmpegAudioFilters {
    * @returns {string}
    */
   public tremolo(value: number): string {
-    if (!value || !this._isBetween(value, 0.1, 20000)) throw new TypeError('The tremolo intensity, between 0.1 and 20000 is required');
+    if (!value || !this._isBetween(value, 0.1, 20000))
+      throw new TypeError('The tremolo intensity, between 0.1 and 20000 is required');
     return `tremolo${value}`;
   }
 

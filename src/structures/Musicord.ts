@@ -1,23 +1,27 @@
 import { Guild } from 'discord.js';
 
 import { version } from '../../package.json';
-import { InitQueueOptions, PlaycordOptions, QueueOptions } from '../utils/Interfaces';
+import { InitQueueOptions, MusicordOptions, QueueOptions } from '../utils/Interfaces';
 import { Player } from './Player';
 
-export class Playcord {
-  public readonly options: PlaycordOptions | {} = {};
+export class Musicord {
+  public readonly options: MusicordOptions | {} = {};
   public readonly queue: Map<string, QueueOptions> = new Map();
 
   /**
-   * Create a new Playcord
-   * @param {PlaycordOptions} options Playcord options
+   * Create a new Musicord
+   * @param {MusicordOptions} options Musicord options
    */
-  constructor(options?: PlaycordOptions) {
+  constructor(options?: MusicordOptions) {
+    /**
+     * Musicord options
+     * @type {MusicordOptions|{}}
+     */
     Object.assign(this.options, options);
   }
 
   /**
-   * Playcord version
+   * Musicord version
    * @type {string}
    */
   get version(): string {

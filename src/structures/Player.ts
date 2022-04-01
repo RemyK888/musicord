@@ -178,7 +178,7 @@ export class Player extends EventEmitter {
 
   /**
    * Creates a new Player.
-   * @param {Map<string, QueueOptions>} queue The Playcord queue
+   * @param {Map<string, QueueOptions>} queue The Musicord queue
    * @param {Guild} guild current guild
    */
   constructor(queue: Map<string, QueueOptions>, guild: Guild, options?: InitQueueOptions) {
@@ -244,7 +244,8 @@ export class Player extends EventEmitter {
    * @returns {void}
    */
   public assignVoiceConnection(connection: VoiceConnection): void {
-    if (!connection || connection instanceof VoiceConnection === false) throw new TypeError('A voice connection is required to assign it to the queue');
+    if (!connection || connection instanceof VoiceConnection === false)
+      throw new TypeError('A voice connection is required to assign it to the queue');
     const currentQueue = this._queue.get(this.guild.id);
     if (currentQueue) currentQueue.connection = connection;
   }
@@ -277,7 +278,8 @@ export class Player extends EventEmitter {
    * @returns {Promise<void>}
    */
   public async addPlaylist(url: string): Promise<void> {
-    if (!url || !url.includes('list') || !youTubePlaylistPattern.test(url)) throw new TypeError('A valid YouTube playlist URL is required to add videos from this playlist to the queue');
+    if (!url || !url.includes('list') || !youTubePlaylistPattern.test(url))
+      throw new TypeError('A valid YouTube playlist URL is required to add videos from this playlist to the queue');
     const playlist = await this._songSearcher.fetchPlaylist(url);
     for (const video of playlist) {
       await this.addSong(video.url);
@@ -372,7 +374,13 @@ export class Player extends EventEmitter {
     const currentQueue = this._queue.get(this.guild.id);
     if (currentQueue) {
       this.emit(PlayerEvents.Stop, this.guild, currentQueue.textChannel);
-      currentQueue.connection?.destroy();
+      try {
+        currentQueue.connection?.destroy();
+        this.emit(PlayerEvents.Disconnected, this.guild, currentQueue.textChannel, currentQueue.voiceChannel);
+      } catch (err) {
+        this.emit(PlayerEvents.Error, err);
+        sleep(5);
+      }
       this._queue.delete(this.guild.id);
     }
   }
@@ -456,7 +464,7 @@ export class Player extends EventEmitter {
    */
   public async play(song: Song | string, channel?: VoiceChannel | StageChannel): Promise<void> {
     if (!song) throw new TypeError('A song is required to play it');
-    let currentQueue = this._queue.get(this.guild.id);
+    const currentQueue = this._queue.get(this.guild.id);
     if (currentQueue) {
       if (currentQueue.playing === true) {
         if (song.toString().includes('list') && youTubePlaylistPattern.test(song as string))
@@ -552,18 +560,14 @@ export class Player extends EventEmitter {
    */
   private async _handleVoiceState(player: AudioPlayer): Promise<void> {
     player.on(AudioPlayerStatus.Idle, (oldState, newState) => {
-      let currentQueue = this._queue.get(this.guild.id);
+      const currentQueue = this._queue.get(this.guild.id);
       if (oldState.status === AudioPlayerStatus.Playing && newState.status === AudioPlayerStatus.Idle) {
         if (currentQueue) {
           currentQueue.playing = false;
           const lastSong = currentQueue.songs[0];
           currentQueue.songs.shift();
-          if (Object.keys(currentQueue.songs).length === 0) {
-            currentQueue.connection?.destroy();
-            currentQueue.connection = undefined;
-            currentQueue.ressource = undefined;
-            this.emit(PlayerEvents.Disconnected, this.guild, currentQueue.textChannel);
-          } else {
+          if (Object.keys(currentQueue.songs).length === 0) this.stop();
+          else {
             this.emit(PlayerEvents.TrackFinished, currentQueue.textChannel, lastSong);
             if (this.options && typeof this.options.autoNextSong === 'boolean' && this.options.autoNextSong === false)
               return;
@@ -595,7 +599,12 @@ export class Player extends EventEmitter {
     const FFmpegStream = FFmpegTranscoder.pipe(opusEncoder);
     FFmpegStream.on(PrismOpusEncoderEvents.Close, () => {
       FFmpegTranscoder.destroy();
-      opusEncoder.destroy();
+      try {
+        opusEncoder.destroy();
+      } catch (err) {
+        this.emit(PlayerEvents.StreamError, err);
+        sleep(5);
+      }
     });
     FFmpegStream.on(PrismOpusEncoderEvents.Error, (err) => {
       FFmpegTranscoder.destroy();

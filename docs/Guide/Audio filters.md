@@ -5,7 +5,7 @@ order: 4
 
 # 🎧 Audio filters
 
-Playcord offers a complete system of audio filters. 
+Musicord offers a complete system of audio filters. 
 About 15 filters are currently available, but this number will increase to 75/100 in the next updates.
 
 ## 🔨 Apply an audio filter
@@ -17,14 +17,14 @@ First, you need to create a queue, or get one if it already exists.
 Then you can apply the filter:
 
 ```js
-const { AudioFilters } = require('playcord');
+const { AudioFilters } = require('musicord');
 
 queue.setFilter(AudioFilters.rotatingAudio);
 ```
 
 ## 🔧 The 10-band equalizer
 
-Playcord offers an innovative and powerful audio filter: the 10-band equalizer.
+Musicord offers an innovative and powerful audio filter: the 10-band equalizer.
 
 Before understanding how it is used, we will explain what an equalizer is (for those who don't know).
 

@@ -1,27 +1,33 @@
-import { CommandOptions, DJSApplicationCommandsSchema, ApplicationCommandsSchemaOptions } from '../utils/Interfaces';
+import { CommandData, DJSApplicationCommandsSchema } from '../utils/Interfaces';
 
 export class ApplicationCommandsSchema {
-  public readonly commands: ApplicationCommandsSchemaOptions;
+  public readonly commands: CommandData[];
 
   /**
    * Creates a new ApplicationCommandSchema.
-   * @param {ApplicationCommandsSchemaOptions} options ApplicationCommandSchema options
+   * @param {CommandOptions[]} options ApplicationCommandSchema options
    * @constructor
    * @example
    * const { ApplicationCommandSchema } = require()
-   * const commandsSchema = new ApplicationCommandSchema({
-   *      play: {
-   *          implemented: true,
-   *          description: 'Some description',
-   *          options: {
-   *              name: 'query',
-   *              description: 'The song title you want to play'
-   *          }
+   * const commandsSchema = new ApplicationCommandSchema([
+   *      {
+   *        name: 'play',
+   *        implemented: true,
+   *        description: 'Some description',
+   *        options: {
+   *            name: 'query',
+   *            description: 'The song title you want to play'
+   *         }
    *      }
-   * });
+   * ]);
    */
-  constructor(options: ApplicationCommandsSchemaOptions) {
+  constructor(options: CommandData[]) {
     if (!options || typeof options !== 'object') throw new TypeError('Options must be an object');
+
+    /**
+     * Slash commands
+     * @type {CommandData[]}
+     */
     this.commands = options;
   }
 
@@ -33,12 +39,12 @@ export class ApplicationCommandsSchema {
    */
   public extract(): DJSApplicationCommandsSchema[] | [] {
     const slashCommandsName: string[] = Object.keys(this.commands);
-    const slashCommandsValues: CommandOptions[] = Object.values(this.commands);
+    const slashCommandsValues: CommandData[] = Object.values(this.commands);
     const extractData: DJSApplicationCommandsSchema[] = [];
     for (const e in this.commands) {
       if (slashCommandsValues[slashCommandsName.indexOf(e)].implemented == false) continue;
       extractData.push({
-        name: String(e),
+        name: slashCommandsValues[slashCommandsName.indexOf(e)].cmdName,
         description: slashCommandsValues[slashCommandsName.indexOf(e)].description,
         options:
           typeof slashCommandsValues[slashCommandsName.indexOf(e)].options == 'undefined' ||

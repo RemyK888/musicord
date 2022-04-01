@@ -9,11 +9,12 @@ import {
   TextBasedChannel,
 } from 'discord.js';
 
-export interface PlaycordOptions {
+export interface MusicordOptions {
   ytApiKey: string;
 }
 
-export interface CommandOptions {
+export interface CommandData {
+  cmdName: string;
   implemented: boolean;
   description: string;
   options?: {
@@ -22,17 +23,6 @@ export interface CommandOptions {
     type: number;
     required?: boolean;
   };
-}
-
-export interface ApplicationCommandsSchemaOptions {
-  play?: CommandOptions;
-  pause?: CommandOptions;
-  stop?: CommandOptions;
-  setvolume?: CommandOptions;
-  resume?: CommandOptions;
-  ping?: CommandOptions;
-  getplaylist?: CommandOptions;
-  skip?: CommandOptions;
 }
 
 type DJSSlashCommandsType = 'STRING' | 'BOOLEAN' | 'NUMBER' | 'CHANNEL';
@@ -51,6 +41,7 @@ export interface DJSApplicationCommandsSchema {
 type Enumerate<N extends number, Acc extends number[] = []> = Acc['length'] extends N
   ? Acc[number]
   : Enumerate<N, [...Acc, Acc['length']]>;
+
 export type Range<F extends number, T extends number> = Exclude<Enumerate<T>, Enumerate<F>>;
 
 export interface AdvancedQueueOptions {

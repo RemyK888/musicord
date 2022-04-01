@@ -1,26 +1,30 @@
 {
-    "name": "playcord",
+    "name": "musicord",
     "version": "0.0.1-beta",
     "description": "A simple, powerful, and user-friendly music package for your Discord bot. Supports v14 of DJS !",
     "main": "./src/index.ts",
+    "types": "./src/index.d.ts",
     "scripts": {
         "format": "prettier --write \"src/**/*.ts\"",
         "lint": "eslint src --ext .ts",
         "build": "rimraf dist && tsc && gen-esm-wrapper ./dist/src/index.js ./dist/src/index.mjs",
         "docs": "ts-docs",
+        "fix": "eslint src --ext .ts --fix",
         "test": "ts-node ./test/index.ts"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/RemyK888/playcord.git"
+        "url": "git+https://github.com/RemyK888/musicord.git"
     },
     "keywords": [
-        "discord-music-system",
+        "musicord",
         "discord-player",
+        "discord-music-system",
         "distube",
         "music",
         "discord",
         "bot",
+        "youtube",
         "discord-music-",
         "discord-music-player",
         "discord-youtube",
@@ -29,9 +33,9 @@
     "author": "RemyK",
     "license": "Apache-2.0",
     "bugs": {
-        "url": "https://github.com/RemyK888/playcord/issues"
+        "url": "https://github.com/RemyK888/musicord/issues"
     },
-    "homepage": "https://github.com/RemyK888/playcord#readme",
+    "homepage": "https://musicord.js.org/",
     "dependencies": {
         "@discordjs/voice": "^0.9.0-dev.1647259738.2297c2b",
         "discord.js": "^14.0.0-dev.1647259751.2297c2b",
@@ -59,5 +63,9 @@
     },
     "engines": {
         "node": ">=16.9.0"
-    }
+    },
+    "exports": {
+        "import": "./src/index.mjs",
+        "require": "./src/index.js"
+      }
 }

@@ -1,6 +1,6 @@
-export const youTubePattern: RegExp = /(youtu\.be\/|youtube\.com\/(watch\?(.*&)?v=|(embed|v)\/))([^\?&"'>]+)/;
-export const audioPattern: RegExp = /(?:((?:https|http):\/\/)|(?:\/)).+(?:.mp3|mp4)/gm;
-export const youTubePlaylistPattern: RegExp = /^.*(youtu.be\/|list=)([^#\&\?]*).*/;
+export const youTubePattern = /(youtu\.be\/|youtube\.com\/(watch\?(.*&)?v=|(embed|v)\/))([^\?&"'>]+)/;
+export const audioPattern = /(?:((?:https|http):\/\/)|(?:\/)).+(?:.mp3|mp4)/gm;
+export const youTubePlaylistPattern = /^.*(youtu.be\/|list=)([^#\&\?]*).*/;
 
 export const youTubeBaseURL = 'https://www.youtube.com';
 export const innerTubeApiURL = 'https://www.youtube.com/youtubei/v1';
@@ -63,9 +63,9 @@ export enum PrismOpusEncoderEvents {
   Resume = 'resume',
 }
 
-export const spotifyPattern: RegExp =
+export const spotifyPattern =
   /(https?:\/\/open.spotify.com\/(track|user|artist|album)\/[a-zA-Z0-9]+(\/playlist\/[a-zA-Z0-9]+|)|spotify:(track|user|artist|album):[a-zA-Z0-9]+(:playlist:[a-zA-Z0-9]+|))/;
-export const spotifyTrackPattern: RegExp =
+export const spotifyTrackPattern =
   /((http:\/\/(open\.spotify\.com\/.*|spoti\.fi\/.*|play\.spotify\.com\/.*))|(https:\/\/(open\.spotify\.com\/.*|play\.spotify\.com\/.*)))/i;
 
 export const spotifyApiURL = 'https://api.spotify.com/v1/';

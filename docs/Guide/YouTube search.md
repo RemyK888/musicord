@@ -5,7 +5,7 @@ order: 3
 
 # 🎧 YouTube search
 
-Playcord offers an innovative YouTube search system that does not use an external library.
+Musicord offers an innovative YouTube search system that does not use an external library.
 No API key is required
 
 ## ▶️ Video
@@ -15,7 +15,7 @@ In order to search for videos on YouTube, you can use the `search()` function, w
 Here is an example of how to use it:
 
 ```js
-const { SongSearcher } = require('playcord');
+const { SongSearcher } = require('musicord');
 
 const songSearcher = new SongSearcher();
 
@@ -62,12 +62,12 @@ console.log(searchedSongs[0].url);
 
 ## ⏸️ Playlist
 
-Playcord does not offer a YouTube playlist search system for API reasons, but you can still use the `fetchPlaylist()` function to fetch up to the first 100 videos of a playlist/mixtape.
+Musicord does not offer a YouTube playlist search system for API reasons, but you can still use the `fetchPlaylist()` function to fetch up to the first 100 videos of a playlist/mixtape.
 
 Here is a small example of how to use it:
 
 ```js
-const { SongSearcher } = require('playcord');
+const { SongSearcher } = require('musicord');
 
 const songSearcher = new SongSearcher();
 

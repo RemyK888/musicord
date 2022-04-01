@@ -5,7 +5,7 @@ order: 2
 
 # 🔧 Slash commands
 
-In order to integrate slash commands easily to your bot, playcord offers you a customized solution.
+In order to integrate slash commands easily to your bot, musicord offers you a customized solution.
 
 ## 📀 ApplicationCommandsSchema
 
@@ -23,8 +23,9 @@ Then you can easily integrate this class into your code. Here is an example of w
 ```js
 const { REST } = require('@discordjs/rest');
 
-const commandsSchema = new ApplicationCommandsSchema({
-  play: {
+const commandsSchema = new ApplicationCommandsSchema([
+  {
+    name: 'play',
     description: 'Play a song',
     implemented: true,
     options: {
@@ -34,13 +35,14 @@ const commandsSchema = new ApplicationCommandsSchema({
       type: 3
     }
   },
-  stop: {
+  {
+    name: 'stop',
     description: 'Stop the music',
     implemented: true,
-  },
-});
+  }
+]);
 
-const rest = new REST({ version: '10' }).setToken('token');
+const rest = new REST({ version: '10' }).setToken('token'); // Version 10 is recommended instead of v9
 
 (async () => {
   try {
