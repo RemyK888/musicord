@@ -11,7 +11,7 @@
 - Easy to use
 - Multiple server
 - Audio filters
-- Lightweightmu
+- Lightweight
 - Faster than other packages
 
 *Note that this package is still under development, if you encounter any errors, please join the [RemyK Discord server](https://discord.gg/UBUSgw4) so that this problem can be fixed as soon as possible.*
