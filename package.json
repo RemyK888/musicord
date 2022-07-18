@@ -37,11 +37,11 @@
     },
     "homepage": "https://musicord.js.org/",
     "dependencies": {
-        "@discordjs/voice": "^0.9.0-dev.1647259738.2297c2b",
-        "discord.js": "^14.0.0-dev.1647259751.2297c2b",
+        "@discordjs/voice": "^0.9.0",
+        "discord.js": "^14.0.2",
         "ffmpeg-static": "^4.4.1",
-        "prism-media": "^1.3.2",
-        "undici": "^4.15.1"
+        "prism-media": "^1.3.4",
+        "undici": "^5.8.0"
     },
     "devDependencies": {
         "@discordjs/rest": "^0.4.0-dev.1646654929.b162f27",
