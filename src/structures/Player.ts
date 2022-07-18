@@ -545,10 +545,10 @@ export class Player extends EventEmitter {
    * @private
    */
   private _setClientVoiceSettings(voiceChannel: VoiceBasedChannel | undefined): void {
-    this.guild.me?.voice.setDeaf(this.clientVoiceSettings.deaf);
+    this.guild.members.me?.voice.setDeaf(this.clientVoiceSettings.deaf);
     if (voiceChannel?.isStage()) {
-      this.guild.me?.voice.setRequestToSpeak(this.clientVoiceSettings.requestToSpeak);
-      this.guild.me?.voice.setSuppressed(this.clientVoiceSettings.suppressed);
+      this.guild.members.me?.voice.setRequestToSpeak(this.clientVoiceSettings.requestToSpeak);
+      this.guild.members.me?.voice.setSuppressed(this.clientVoiceSettings.suppressed);
     }
   }
 
